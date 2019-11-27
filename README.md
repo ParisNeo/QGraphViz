@@ -18,3 +18,7 @@ So since I didn't find any package out there that satifies my needs, I decided t
 
 Build python pyQT5 based QWidget that can visualize graphs and allow realtime interaction with graphs add edges and nodes, change attributes ...
 
+## Installation
+```bash
+pip install QGraphViz
+```

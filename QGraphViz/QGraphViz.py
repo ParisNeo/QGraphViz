@@ -7,8 +7,9 @@ Description:
 Main Class to QGraphViz tool
 """
 from PyQt5.QtWidgets import QApplication, QWidget
+from PyQt5.QtGui import QPainter 
 import sys
-from dot_parser.dot_parser import DotParser
+from QGraphViz.DotParser import DotParser
 class QGraphViz(QWidget):
     """
     Main graphviz widget to draw and interact with graphs
@@ -18,6 +19,10 @@ class QGraphViz(QWidget):
         self.parser = DotParser()
         self.engine=engine
         self.graph=None
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        self.engine.paint(painter,self.graph)
 
     def new(self, engine):
         """

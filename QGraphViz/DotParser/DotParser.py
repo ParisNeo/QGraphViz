@@ -6,9 +6,9 @@ Author: Saifeddine ALOUI
 Description:
 Dot perser implementation
 """
-from dot_parser.graph import Graph
-from dot_parser.node import Node
-from dot_parser.edge import Edge
+from QGraphViz.DotParser import Graph
+from QGraphViz.DotParser import Node
+from QGraphViz.DotParser import Edge
 
 class DotParser():
     """
