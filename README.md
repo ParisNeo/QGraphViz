@@ -17,8 +17,19 @@ So since I didn't find any package out there that satifies my needs, I decided t
 ## Objective
 
 Build python pyQT5 based QWidget that can visualize graphs and allow realtime interaction with graphs add edges and nodes, change attributes ...
+## Requirements
+
+As its name suggests, this module needs you to install pyqt5 first.
+```bash
+pip install pyqt5
+```
 
 ## Installation
 ```bash
 pip install QGraphViz
 ```
+
+## Actual status
+1. Simple nodes with a very simplified Dot engine is working
+2. Graph nodes are not yet manipulable
+3. File parsing is not implemented yet
