@@ -17,13 +17,22 @@ class QEdge(QWidget):
     def __init__(self, edge, parent):
         super().__init__(parent)
         self.edge=edge
-        self.setGeometry(self.edge.source.pos[0],self.edge.source.pos[1],
-                         self.edge.dest.pos[0]-self.edge.dest.pos[0],self.edge.source.pos[1] - self.edge.source.pos[1])
+        self.update()
+        self.show()
     def update(self):
+        w=abs(self.edge.dest.pos[0]-self.edge.source.pos[0])
+        h=abs(self.edge.dest.pos[1] - self.edge.source.pos[1])
+        if w==0:
+            w=5
+        if h==0:
+            h=5
+
         self.setGeometry(self.edge.source.pos[0],self.edge.source.pos[1],
-                         abs(self.edge.dest.pos[0]-self.edge.dest.pos[0]),abs(self.edge.source.pos[1] - self.edge.source.pos[1]))
+                         w,h)
     
     def paintEvent(self, event):
         painter = QPainter(self) 
-        painter.drawRect(0,0,self.edge.dest.pos[0]-self.edge.dest.pos[0],self.edge.source.pos[1] - self.edge.source.pos[1])
+        painter.drawLine(0,0,
+        self.edge.dest.pos[0] - self.edge.source.pos[0],
+        self.edge.dest.pos[1] - self.edge.source.pos[1])
          # TODO : implement painting graph using DOT engine

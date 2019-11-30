@@ -19,29 +19,37 @@ class Dot(LayoutEngine):
         self.default_node_height=100
         self.default_min_nodes_dist=self.default_node_height
 
-    def process(self, n):
+    def process(self, n, index=0, nb_brothers=0):
+        n.processed=True
         if len(n.in_edges)==0:
             n.pos[0]=self.current_x
             n.pos[1]=self.default_node_height/2
             n.size[0]=self.default_node_width
             n.size[1]=self.default_node_height
             self.current_x += self.default_node_width + self.default_min_nodes_dist
+            for i,oe in enumerate(n.out_edges):
+                self.process(oe.dest, i,len(n.out_edges))
         else:
-            x=0
+            x=(self.default_node_width + self.default_min_nodes_dist)*(-(nb_brothers-1)/2+index)
             y=0
+            for i,oe in enumerate(n.out_edges):
+                self.process(oe.dest, i,len(n.out_edges))
+
             for edg in n.in_edges:
-                if(edg.source.processed):
-                    x += edg.source.pos[0]
-                    if(y<edg.source.pos[1]+self.default_node_height/2+self.default_min_nodes_dist):
-                        y = edg.source.pos[1]+self.default_node_height/2+self.default_min_nodes_dist
-                else:
+                if not(edg.source.processed):
                     self.process(edg.source)
-                x/=len(n.in_edges)
+                x += edg.source.pos[0]
+                if(y<edg.source.pos[1]+self.default_node_height/2+self.default_min_nodes_dist):
+                    y = edg.source.pos[1]+self.default_node_height/2+self.default_min_nodes_dist
+            x/=len(n.in_edges)
+
             n.pos[0]=x
             n.pos[1]=y
             n.size[0]=self.default_node_width
             n.size[1]=self.default_node_height
-        n.processed=True
+            for i,oe in enumerate(n.out_edges):
+                self.process(oe.dest, i,len(n.out_edges))
+
     def build(self):
         self.current_x=self.default_node_width/2
         self.current_y =self.default_node_height/2

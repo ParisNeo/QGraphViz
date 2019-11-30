@@ -32,5 +32,5 @@ class QNode(QWidget):
     
     def paintEvent(self, event):
         painter = QPainter(self) 
-        painter.drawRect(0,0,self.node.size[0]-1, self.node.size[1]-1)
+        painter.drawEllipse(0,0,self.node.size[0]-1, self.node.size[1]-1)
          # TODO : implement painting graph using DOT engine

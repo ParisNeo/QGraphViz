@@ -30,6 +30,6 @@ pip install QGraphViz
 ```
 
 ## Actual status
-1. Simple nodes with a very simplified Dot engine is working
+1. Simple graphs visualization (nodes + edges)
 2. Graph nodes are not yet manipulable
 3. File parsing is not implemented yet

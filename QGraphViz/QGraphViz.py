@@ -7,7 +7,8 @@ Description:
 Main Class to QGraphViz tool
 """
 from PyQt5.QtWidgets import QApplication, QWidget
-from PyQt5.QtGui import QPainter 
+from PyQt5.QtGui import QPainter, QPen, QBrush
+from PyQt5.QtCore import Qt 
 import sys
 from QGraphViz.DotParser import DotParser, Node, Edge, Graph
 from QGraphViz.QWidgets import QNode, QEdge
@@ -24,6 +25,7 @@ class QGraphViz(QWidget):
 
     def build(self):
         self.engine.build()
+        """
         for node in self.engine.graph.nodes:
             qnode = QNode(node, self)
             qnode.setParent(self)
@@ -32,6 +34,28 @@ class QGraphViz(QWidget):
             qedge = QEdge(edge, self)
             qedge.setParent(self)
             self.qedges.append(qedge)
+        """
+    def paintEvent(self, event):
+        painter = QPainter(self) 
+        brush = QBrush(Qt.SolidPattern)
+        brush.setColor(Qt.white)
+        painter.setBrush(brush)
+        for edge in self.engine.graph.edges:
+            painter.drawLine(edge.source.pos[0],edge.source.pos[1],
+            edge.dest.pos[0],
+            edge.dest.pos[1])
+         # TODO : implement painting graph using DOT engine
+        for node in self.engine.graph.nodes:
+            painter.drawEllipse(
+                        node.pos[0]-node.size[0]/2,
+                        node.pos[1]-node.size[1]/2,
+                        node.size[0], node.size[1])
+            if("label" in node.kwargs.keys()):
+                painter.drawText(
+                    node.pos[0]-node.size[0]/2,
+                    node.pos[1]-node.size[1]/2,
+                    node.size[0], node.size[1],
+                    Qt.AlignCenter|Qt.AlignTop,node.kwargs["label"])
 
     def new(self, engine):
         """
