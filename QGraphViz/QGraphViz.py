@@ -72,10 +72,19 @@ class QGraphViz(QWidget):
             edge.dest.pos[1])
          # TODO : implement painting graph using DOT engine
         for node in self.engine.graph.nodes:
-            painter.drawEllipse(
-                        node.pos[0]-node.size[0]/2,
-                        node.pos[1]-node.size[1]/2,
-                        node.size[0], node.size[1])
+            if("shape" in node.kwargs.keys()):
+                if(node.kwargs["shape"]=="box"):
+                    painter.drawRect(
+                                node.pos[0]-node.size[0]/2,
+                                node.pos[1]-node.size[1]/2,
+                                node.size[0], node.size[1])
+
+            else:
+                painter.drawEllipse(
+                            node.pos[0]-node.size[0]/2,
+                            node.pos[1]-node.size[1]/2,
+                            node.size[0], node.size[1])
+
             if("label" in node.kwargs.keys()):
                 painter.drawText(
                     node.pos[0]-node.size[0]/2,
@@ -86,8 +95,12 @@ class QGraphViz(QWidget):
         if( self.manipulation_mode==QGraphVizManipulationMode.Edges_Conect_Mode and 
             self.mouse_down and 
             self.selected_Node is not None):
+            bkp = painter.pen()
+            pen=QPen(Qt.DashLine)
+            painter.setPen(pen)
             painter.drawLine(self.selected_Node.pos[0], self.selected_Node.pos[1],
                              self.current_pos[0],self.current_pos[1])
+            painter.setPen(bkp)
     def new(self, engine):
         """
         Creates a new engine
@@ -171,20 +184,24 @@ class QGraphViz(QWidget):
         if(self.manipulation_mode==QGraphVizManipulationMode.Edges_Conect_Mode):
             if self.selected_Node is not None and self.mouse_down:
                 n = self.findNode(x,y)
-                if(n!=self.selected_Node):
+                if(n!=self.selected_Node and n is not None):
                     self.addEdge(self.selected_Node, n)
                     self.build()
-                    self.repaint()
                     if(self.new_edge_created_callback is not None):
                         self.new_edge_created_callback(self.selected_Node,n)
                 self.selected_Node=None
 
-        self.mouse_down=False
         QWidget.mouseReleaseEvent(self, event)
         if(self.manipulation_mode==QGraphVizManipulationMode.Node_remove_Mode):
             if(n is not None):
                 self.removeNode(n)
                 self.build()
+                self.repaint()
 
         if(self.node_selected_callback is not None):
             self.node_selected_callback(n)
+
+        self.mouse_down=False
+        self.repaint()
+
+        

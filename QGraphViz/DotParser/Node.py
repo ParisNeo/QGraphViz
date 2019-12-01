@@ -19,5 +19,6 @@ class Node():
         # Nodes
         self.in_edges=[]
         self.out_edges=[]
+        processed = 0
 
     

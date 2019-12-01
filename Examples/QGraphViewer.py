@@ -76,7 +76,7 @@ if __name__ == "__main__":
         if okPressed and node_name != '':
             node_label, okPressed = QInputDialog.getText(wi, "Node label","Node label:", QLineEdit.Normal, "")
             if okPressed and node_label != '':
-                qgv.addNode(node_name, label=node_label)
+                qgv.addNode(node_name, label=node_label, shape="box")
                 qgv.build()
     def rem_node():
         qgv.manipulation_mode=QGraphVizManipulationMode.Node_remove_Mode

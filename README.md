@@ -35,7 +35,8 @@ pip install QGraphViz
 2. Siple graphs writing to file
 3. Graph nodes are now manipulable and we can add nodes and link them using the QWidget gui, wa can also delete nodes.
 4. User application is informed wen a new connection is created between two nodes, when a node is selected or when it is double clicked.
-5. File parsing is not implemented yet
-6. Advanced nodes coloring and shapes are not yet implemented
-7. Subgraphs are not supported yet
-8. Only the dot layout is partially implemented
+5. Only two supported node shapes (box or oval)
+6. File parsing is not implemented yet
+7. Advanced nodes coloring and shapes are not yet implemented
+8. Subgraphs are not supported yet
+9. Only the dot layout is partially implemented
