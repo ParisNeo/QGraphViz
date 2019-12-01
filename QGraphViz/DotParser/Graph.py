@@ -6,15 +6,21 @@ Author: Saifeddine ALOUI
 Description:
 Grapph object
 """
+import enum
+
+class GraphType(enum.Enum):
+    SimpleGraph=0
+    DirectedGraph=1        
 
 class Graph():
     """
     The graph object made of nodes, edges and subgraphs 
     """
-    def __init__(self):
+    def __init__(self, graph_type = GraphType.SimpleGraph):
         self.nodes=[]
         self.edges=[]
         self.subgraphs=[]
+        self.graph_type = graph_type
 
     def addNode(self, node):
         """

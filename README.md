@@ -31,5 +31,8 @@ pip install QGraphViz
 
 ## Actual status
 1. Simple graphs visualization (nodes + edges)
-2. Graph nodes are not yet manipulable
-3. File parsing is not implemented yet
+2. Siple graphs writing to file
+3. Graph nodes are not now manipulable and we can add nodes and link them
+4. User application is informed wen a new connection is created between two nodes
+5. File parsing is not implemented yet
+6. Advanced nodes coloring and shapes are not yet implemented
