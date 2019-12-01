@@ -20,8 +20,19 @@ from QGraphViz.Engines import Dot
 if __name__ == "__main__":
     # Create QT application
     app = QApplication(sys.argv)
+    # What node is selected ?
+    current_node=None
+    # Events
+    def node_selected(node):
+        if(qgv.manipulation_mode==QGraphVizManipulationMode.Node_remove_Mode):
+            print("Node {} removed".format(node))
+        else:
+            current_Node=node
+            print("Node selected")
+    def node_invoked(node):
+        print("Node double clicked")
     # Create QGraphViz widget
-    qgv = QGraphViz()
+    qgv = QGraphViz(node_selected_callback=node_selected,node_invoked_callback=node_invoked)
     # Create A new Graph using Dot layout engine
     qgv.new(Dot(Graph()))
     # Define sone graph
@@ -31,12 +42,14 @@ if __name__ == "__main__":
     n4 = qgv.addNode("Node4", label="N4")
     n5 = qgv.addNode("Node5", label="N5")
     n6 = qgv.addNode("Node6", label="N6")
+
     qgv.addEdge(n1, n2)
     qgv.addEdge(n3, n2)
     qgv.addEdge(n2, n4)
     qgv.addEdge(n4, n5)
     qgv.addEdge(n4, n6)
     qgv.addEdge(n3, n6)
+
     # Build the graph (the layout engine organizes where the nodes and connections are)
     qgv.build()
     # Save it to a file to be loaded by Graphviz if needed
@@ -65,8 +78,15 @@ if __name__ == "__main__":
             if okPressed and node_label != '':
                 qgv.addNode(node_name, label=node_label)
                 qgv.build()
+    def rem_node():
+        qgv.manipulation_mode=QGraphVizManipulationMode.Node_remove_Mode
+
     def add_edge():
         qgv.manipulation_mode=QGraphVizManipulationMode.Edges_Conect_Mode
+
+    def remove_Node():
+        qgv.manipulation_mode=QGraphVizManipulationMode.Edges_Conect_Mode
+        print("Removing nodes")
 
     btnManip = QPushButton("Manipulate")    
     btnManip.clicked.connect(manipulate)
@@ -77,6 +97,10 @@ if __name__ == "__main__":
     btnAddNode = QPushButton("Add Node")    
     btnAddNode.clicked.connect(add_node)
     hpanel.addWidget(btnAddNode)
+    btnRemNode = QPushButton("Rem Node")    
+    btnRemNode.clicked.connect(rem_node)
+    hpanel.addWidget(btnRemNode)
+
     btnAddEdge = QPushButton("Add Edge")    
     btnAddEdge.clicked.connect(add_edge)
     hpanel.addWidget(btnAddEdge)

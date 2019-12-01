@@ -11,12 +11,14 @@ from PyQt5.QtGui import QPainter, QPen, QBrush
 from PyQt5.QtCore import Qt 
 import sys
 import enum
+import datetime
 from QGraphViz.DotParser import DotParser, Node, Edge, Graph
 
 
 class QGraphVizManipulationMode(enum.Enum):
     Nodes_Move_Mode=0
     Edges_Conect_Mode=1
+    Node_remove_Mode=2
 
 class QGraphViz(QWidget):
     """
@@ -27,7 +29,9 @@ class QGraphViz(QWidget):
                     parent=None, 
                     engine=None, 
                     manipulation_mode=QGraphVizManipulationMode.Nodes_Move_Mode,
-                    new_edge_created_callback=None # A callbakc called when a new connection is created between two nodes using the GUI
+                    new_edge_created_callback=None, # A callbakc called when a new connection is created between two nodes using the GUI
+                    node_selected_callback=None, # A callback called when a node is clicked
+                    node_invoked_callback=None # A callback called when a node is double clicked
                 ):
         QWidget.__init__(self,parent)
         self.parser = DotParser()
@@ -40,6 +44,9 @@ class QGraphViz(QWidget):
         self.current_pos = [0,0]
         self.mouse_down=False
         self.new_edge_created_callback = new_edge_created_callback
+        self.node_selected_callback = node_selected_callback
+        self.node_invoked_callback = node_invoked_callback
+
 
     def build(self):
         self.engine.build()
@@ -97,6 +104,19 @@ class QGraphViz(QWidget):
         edge = Edge(source, dest)
         self.engine.graph.edges.append(edge)
 
+    def removeNode(self, node):
+        if(node in self.engine.graph.nodes):
+            idx = self.engine.graph.nodes.index(node)
+            node = self.engine.graph.nodes[idx]
+            for edge in node.in_edges:
+                del edge.source.out_edges[edge.source.out_edges.index(edge)]
+                del self.engine.graph.edges[self.engine.graph.edges.index(edge)]
+            for edge in node.out_edges:
+                del self.engine.graph.edges[self.engine.graph.edges.index(edge)]
+                del edge.dest.in_edges[edge.dest.in_edges.index(edge)]
+            del self.engine.graph.nodes[idx]
+            self.repaint()
+
     def findNode(self, x, y):
         for n in self.engine.graph.nodes:
             if(
@@ -112,6 +132,15 @@ class QGraphViz(QWidget):
     def save(self, filename):
         self.parser.save(filename, self.engine.graph)
 
+
+    def mouseDoubleClickEvent(self, event):
+        if(self.node_invoked_callback is not None):
+            x = event.x()
+            y = event.y()
+            n = self.findNode(x,y)
+            self.node_invoked_callback(n)
+        QWidget.mouseDoubleClickEvent(self, event)
+
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             x = event.x()
@@ -120,6 +149,8 @@ class QGraphViz(QWidget):
             self.selected_Node = n                
             self.current_pos = [x,y]
             self.mouse_down=True
+        QWidget.mousePressEvent(self, event)
+
 
     def mouseMoveEvent(self, event):
         if self.selected_Node is not None and self.mouse_down:
@@ -131,10 +162,13 @@ class QGraphViz(QWidget):
 
             self.current_pos = [x,y]
             self.repaint()
+        QWidget.mouseMoveEvent(self, event)
+
     def mouseReleaseEvent(self, event):
+        x = event.x()
+        y = event.y()
+        n = self.findNode(x,y)        
         if(self.manipulation_mode==QGraphVizManipulationMode.Edges_Conect_Mode):
-            x = event.x()
-            y = event.y()
             if self.selected_Node is not None and self.mouse_down:
                 n = self.findNode(x,y)
                 if(n!=self.selected_Node):
@@ -146,3 +180,11 @@ class QGraphViz(QWidget):
                 self.selected_Node=None
 
         self.mouse_down=False
+        QWidget.mouseReleaseEvent(self, event)
+        if(self.manipulation_mode==QGraphVizManipulationMode.Node_remove_Mode):
+            if(n is not None):
+                self.removeNode(n)
+                self.build()
+
+        if(self.node_selected_callback is not None):
+            self.node_selected_callback(n)

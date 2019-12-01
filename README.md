@@ -33,8 +33,8 @@ pip install QGraphViz
 ## Actual status
 1. Simple graphs visualization (nodes + edges)
 2. Siple graphs writing to file
-3. Graph nodes are now manipulable and we can add nodes and link them using the QWidget gui
-4. User application is informed wen a new connection is created between two nodes
+3. Graph nodes are now manipulable and we can add nodes and link them using the QWidget gui, wa can also delete nodes.
+4. User application is informed wen a new connection is created between two nodes, when a node is selected or when it is double clicked.
 5. File parsing is not implemented yet
 6. Advanced nodes coloring and shapes are not yet implemented
 7. Subgraphs are not supported yet
