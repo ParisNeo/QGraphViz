@@ -1,9 +1,10 @@
 # QGraphViz
-A PyQT based GraphViz builder/renderer
+A PyQT based GraphViz builder/renderer (100% opensource)
 
 ## Introduction
 
-I was searching a handy tool to code graphs using python then visualize them within my software. I found about graphviz which is a great tool to build graphs.
+I was searching for a handy tool to code graphs using python then visualize them within my software. I found about graphviz which is a great tool to build graphs.
+
 The problem is that you need to install the graphviz software in order to compile your file and render it.
 There is a graphviz package on PYPI that allows creating dot code that can then be processed by graphviz, but in practice, you need to install graphviz and somehow add it to your path in order to execute the render command.
 
@@ -19,7 +20,7 @@ So since I didn't find any package out there that satifies my needs, I decided t
 Build python pyQT5 based QWidget that can visualize graphs and allow realtime interaction with graphs add edges and nodes, change attributes ...
 ## Requirements
 
-As its name suggests, this module needs you to install pyqt5 first.
+As its name suggests, this module needs you to install pyqt5 package first.
 ```bash
 pip install pyqt5
 ```
@@ -32,7 +33,9 @@ pip install QGraphViz
 ## Actual status
 1. Simple graphs visualization (nodes + edges)
 2. Siple graphs writing to file
-3. Graph nodes are not now manipulable and we can add nodes and link them
+3. Graph nodes are now manipulable and we can add nodes and link them using the QWidget gui
 4. User application is informed wen a new connection is created between two nodes
 5. File parsing is not implemented yet
 6. Advanced nodes coloring and shapes are not yet implemented
+7. Subgraphs are not supported yet
+8. Only the dot layout is partially implemented
