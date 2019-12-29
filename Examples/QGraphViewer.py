@@ -53,7 +53,7 @@ if __name__ == "__main__":
     # Build the graph (the layout engine organizes where the nodes and connections are)
     qgv.build()
     # Save it to a file to be loaded by Graphviz if needed
-    # qgv.save("test.gv")
+    qgv.save("test.gv")
     # Create a Main window
     w = QMainWindow()
     w.setWindowTitle('Simple')

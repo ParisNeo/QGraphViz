@@ -17,42 +17,53 @@ class DotParser():
     def __init__(self):
         pass
     
-    def parse_subdata(self, data, graph):
-        end_index= len(data)
+    def find_params(self, data):
         try:
             start_idx=data.index("[")
             end_index=data.index("]")
 
-            subname = data[0:start_idx].strip()
             strparams = data[start_idx+1:end_index].split(" ")
             params={}
             for param in strparams:
                 vals = param.split("=")
                 params[vals[0].strip()] = vals[1].strip()
-            node = Node(subname)
-            node.kwargs = params
-            graph.nodes.append(node)
-
+            return params, start_idx, end_index
         except:
+            return None, 0, 0
+    def parse_subdata(self, data, graph):
+        try:
+            end_index=data.index(";")
+            sub_data = data[:end_index]
             try:
-                start_idx=data.index("--")
-                try:
-                    end_index=data[start_idx+3:].index(" ")+start_idx+3
-                except:
-                    end_index=len(data)
+                link_idx=sub_data.index("--")
+                # find parameters
 
-                source_node_name = data[:start_idx].strip()
-                dest_node_name = data[start_idx+3:end_index].strip()
+                source_node_name = sub_data[:link_idx].strip()
+                dest_node_name = sub_data[link_idx+3:end_index].strip()
                 source_node  = graph.getNodeByName(source_node_name)
                 dest_node  = graph.getNodeByName(dest_node_name)
                 if(source_node is not None and dest_node is not None):
                     edge = Edge(source_node, dest_node)
                     graph.edges.append(edge)
-
             except:
-                pass
-        if(end_index<len(data)):
-            self.parse_subdata(data[end_index+1:],graph)
+                try:
+                    params, params_start_idx, params_end_index =self.find_params(sub_data)
+                    if(params is not None):
+                        subname = data[0:params_start_idx].strip()
+                    else:
+                        subname = data[0:end_index].strip()
+
+                    node = Node(subname)
+                    node.kwargs = params
+                    graph.nodes.append(node)
+
+
+                except:
+                    pass
+            if(end_index<len(data)):
+                self.parse_subdata(data[end_index+1:], graph)
+        except:
+            pass
 
     def parseFile(self, filename):
         graph=Graph()
@@ -81,14 +92,14 @@ class DotParser():
             if graph.graph_type == GraphType.SimpleGraph:
                 fi.write("graph {\n")
                 for node in graph.nodes:
-                    fi.write("    {} [{}]\n".format(node.name, " ".join(["{}={}".format(k,v) for k,v in node.kwargs.items()])))
+                    fi.write("    {} [{}];\n".format(node.name, " ".join(["{}={}".format(k,v) for k,v in node.kwargs.items()])))
                 for edge in graph.edges:
-                    fi.write("    {} -- {}\n".format(edge.source.name, edge.dest.name))
+                    fi.write("    {} -- {};\n".format(edge.source.name, edge.dest.name))
                 fi.write("}")
             if graph.graph_type == GraphType.DirectedGraph:
                 fi.write("dgraph {\n")
                 for node in graph.nodes:
-                    fi.write("    {} [{}]\n".format(node.name, " ".join(["{}={}".format(k,v) for k,v in node.kwargs.items()])))
+                    fi.write("    {} [{}];\n".format(node.name, ",".join(["{}={}".format(k,v) for k,v in node.kwargs.items()])))
                 for edge in graph.edges:
-                    fi.write("    {} -> {}\n".format(edge.source.name, edge.dest.name))
+                    fi.write("    {} -> {};\n".format(edge.source.name, edge.dest.name))
                 fi.write("}")
