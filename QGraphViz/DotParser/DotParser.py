@@ -16,13 +16,29 @@ class DotParser():
     """
     def __init__(self):
         pass
-    
+    def split(self, s):
+        parts = []
+        bracket_level = 0
+        current = []
+        # trick to remove special-case of trailing chars
+        for c in (s + ","):
+            if c == "," and bracket_level == 0:
+                parts.append("".join(current))
+                current = []
+            else:
+                if c == "{":
+                    bracket_level += 1
+                elif c == "}":
+                    bracket_level -= 1
+                current.append(c)
+        return parts    
     def find_params(self, data):
         try:
             start_idx=data.index("[")
-            end_index=data.index("]")
+            end_index=data.rindex("]")
 
-            strparams = data[start_idx+1:end_index].split(" ")
+            strparams = self.split(data[start_idx+1:end_index])#.split(",")
+
             params={}
             for param in strparams:
                 vals = param.split("=")
@@ -92,7 +108,7 @@ class DotParser():
             if graph.graph_type == GraphType.SimpleGraph:
                 fi.write("graph {\n")
                 for node in graph.nodes:
-                    fi.write("    {} [{}];\n".format(node.name, " ".join(["{}={}".format(k,v) for k,v in node.kwargs.items()])))
+                    fi.write("    {} [{}];\n".format(node.name, ",".join(["{}={}".format(k,v) for k,v in node.kwargs.items()])))
                 for edge in graph.edges:
                     fi.write("    {} -- {};\n".format(edge.source.name, edge.dest.name))
                 fi.write("}")

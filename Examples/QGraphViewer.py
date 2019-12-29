@@ -8,7 +8,7 @@ A simple graphviz graphs viewer that enables creating graphs visually,
 manipulate them and save them
 
 """
-from PyQt5.QtWidgets import QDialog, QApplication, QWidget, QMainWindow, QVBoxLayout, QHBoxLayout, QFormLayout, QComboBox, QPushButton, QInputDialog, QLineEdit, QLabel
+from PyQt5.QtWidgets import QFileDialog, QDialog, QApplication, QWidget, QMainWindow, QVBoxLayout, QHBoxLayout, QFormLayout, QComboBox, QPushButton, QInputDialog, QLineEdit, QLabel
 import sys
 import os
 sys.path.insert(1,os.path.dirname(__file__)+"/..")
@@ -70,10 +70,14 @@ if __name__ == "__main__":
     def manipulate():
         qgv.manipulation_mode=QGraphVizManipulationMode.Nodes_Move_Mode
     def save():
-        qgv.save("test.gv")
+        fname = QFileDialog.getSaveFileName(qgv, "Save", "", "*.gv")
+        if(fname[0]!=""):
+            qgv.save(fname[0])
         
     def load():
-        qgv.load_file("test.gv")
+        fname = QFileDialog.getOpenFileName(qgv, "Open", "", "*.gv")
+        if(fname[0]!=""):
+            qgv.load_file(fname[0])
 
     def add_node():
         dlg = QDialog()
