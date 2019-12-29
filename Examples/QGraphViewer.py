@@ -8,7 +8,7 @@ A simple graphviz graphs viewer that enables creating graphs visually,
 manipulate them and save them
 
 """
-from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QInputDialog, QLineEdit
+from PyQt5.QtWidgets import QDialog, QApplication, QWidget, QMainWindow, QVBoxLayout, QHBoxLayout, QFormLayout, QComboBox, QPushButton, QInputDialog, QLineEdit, QLabel
 import sys
 import os
 sys.path.insert(1,os.path.dirname(__file__)+"/..")
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     # Build the graph (the layout engine organizes where the nodes and connections are)
     qgv.build()
     # Save it to a file to be loaded by Graphviz if needed
-    qgv.save("test.gv")
+    # qgv.save("test.gv")
     # Create a Main window
     w = QMainWindow()
     w.setWindowTitle('Simple')
@@ -71,12 +71,64 @@ if __name__ == "__main__":
         qgv.manipulation_mode=QGraphVizManipulationMode.Nodes_Move_Mode
     def save():
         qgv.save("test.gv")
+        
+    def load():
+        qgv.load_file("test.gv")
+
     def add_node():
-        node_name, okPressed = QInputDialog.getText(wi, "Node name","Node name:", QLineEdit.Normal, "")
-        if okPressed and node_name != '':
-            node_label, okPressed = QInputDialog.getText(wi, "Node label","Node label:", QLineEdit.Normal, "")
-            if okPressed and node_label != '':
-                qgv.addNode(node_name, label=node_label, shape="box")
+        dlg = QDialog()
+        dlg.ok=False
+        dlg.node_name=""
+        dlg.node_label=""
+        dlg.node_type="None"
+        # Layouts
+        main_layout = QVBoxLayout()
+        l = QFormLayout()
+        buttons_layout = QHBoxLayout()
+
+        main_layout.addLayout(l)
+        main_layout.addLayout(buttons_layout)
+        dlg.setLayout(main_layout)
+
+        leNodeName = QLineEdit()
+        leNodeLabel = QLineEdit()
+        cbxNodeType = QComboBox()
+
+        pbOK = QPushButton()
+        pbCancel = QPushButton()
+
+        cbxNodeType.addItems(["None","circle","box"])
+        pbOK.setText("&OK")
+        pbCancel.setText("&Cancel")
+
+        l.setWidget(0, QFormLayout.LabelRole, QLabel("Node Name"))
+        l.setWidget(0, QFormLayout.FieldRole, leNodeName)
+        l.setWidget(1, QFormLayout.LabelRole, QLabel("Node Label"))
+        l.setWidget(1, QFormLayout.FieldRole, leNodeLabel)
+        l.setWidget(2, QFormLayout.LabelRole, QLabel("Node Type"))
+        l.setWidget(2, QFormLayout.FieldRole, cbxNodeType)
+
+        def ok():
+            dlg.OK=True
+            dlg.node_name = leNodeName.text()
+            dlg.node_label = leNodeLabel.text()
+            dlg.node_type = cbxNodeType.currentText()
+            dlg.close()
+
+        def cancel():
+            dlg.OK=False
+            dlg.close()
+
+        pbOK.clicked.connect(ok)
+        pbCancel.clicked.connect(cancel)
+
+        buttons_layout.addWidget(pbOK)
+        buttons_layout.addWidget(pbCancel)
+        dlg.exec_()
+
+        #node_name, okPressed = QInputDialog.getText(wi, "Node name","Node name:", QLineEdit.Normal, "")
+        if dlg.OK and dlg.node_name != '':
+                qgv.addNode(dlg.node_name, label=dlg.node_label, shape=dlg.node_type)
                 qgv.build()
     def rem_node():
         qgv.manipulation_mode=QGraphVizManipulationMode.Node_remove_Mode
@@ -91,8 +143,11 @@ if __name__ == "__main__":
     btnManip = QPushButton("Manipulate")    
     btnManip.clicked.connect(manipulate)
     hpanel.addWidget(btnManip)
+    btnOpen = QPushButton("Open")    
+    btnOpen.clicked.connect(load)
     btnSave = QPushButton("Save")    
     btnSave.clicked.connect(save)
+    hpanel.addWidget(btnOpen)
     hpanel.addWidget(btnSave)
     btnAddNode = QPushButton("Add Node")    
     btnAddNode.clicked.connect(add_node)

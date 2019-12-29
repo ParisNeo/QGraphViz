@@ -42,4 +42,11 @@ class Graph():
         :param subgraph: The subgraph to be added 
         """
         self.nodes.append(subgraph)
+    
+    def getNodeByName(self, name):
+        nodenames = [n.name for n in self.nodes]
+        if name in nodenames:
+            return self.nodes[nodenames.index(name)]
+        else:
+            return None
 

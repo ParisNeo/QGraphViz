@@ -3,10 +3,10 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 setuptools.setup(
      name='QGraphViz',  
-     version='0.0.3',
+     version='0.0.7',
      author="Saifeddine ALOUI",
      author_email="aloui.saifeddine@gmail.com",
-     description="A PyQt5 widget to manipulate (build, render and save) Graphviz graphs",
+     description="A PyQt5 widget to manipulate (build, render, interact, load and save) Graphviz graphs",
      long_description=long_description,
      long_description_content_type="text/markdown",
      url="https://github.com/ParisNeo/QGraphViz",

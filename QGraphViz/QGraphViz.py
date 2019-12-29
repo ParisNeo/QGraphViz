@@ -7,7 +7,7 @@ Description:
 Main Class to QGraphViz tool
 """
 from PyQt5.QtWidgets import QApplication, QWidget
-from PyQt5.QtGui import QPainter, QPen, QBrush
+from PyQt5.QtGui import QPainter, QPen, QBrush, QColor
 from PyQt5.QtCore import Qt 
 import sys
 import enum
@@ -63,8 +63,10 @@ class QGraphViz(QWidget):
 
     def paintEvent(self, event):
         painter = QPainter(self) 
+        painter.setFont(self.engine.font)
         brush = QBrush(Qt.SolidPattern)
         brush.setColor(Qt.white)
+        pen=QPen()
         painter.setBrush(brush)
         for edge in self.engine.graph.edges:
             painter.drawLine(edge.source.pos[0],edge.source.pos[1],
@@ -78,12 +80,23 @@ class QGraphViz(QWidget):
                                 node.pos[0]-node.size[0]/2,
                                 node.pos[1]-node.size[1]/2,
                                 node.size[0], node.size[1])
+                if(node.kwargs["shape"]=="circle"):
+                    painter.drawEllipse(
+                                node.pos[0]-node.size[0]/2,
+                                node.pos[1]-node.size[1]/2,
+                                node.size[0], node.size[1])
 
             else:
                 painter.drawEllipse(
                             node.pos[0]-node.size[0]/2,
                             node.pos[1]-node.size[1]/2,
                             node.size[0], node.size[1])
+            if("color" in node.kwargs.keys()):
+                pen.setColor(QColor(node.kwargs["color"]))
+            else:
+                pen.setColor(QColor("black"))
+
+            painter.setPen(pen)
 
             if("label" in node.kwargs.keys()):
                 painter.drawText(
@@ -101,6 +114,7 @@ class QGraphViz(QWidget):
             painter.drawLine(self.selected_Node.pos[0], self.selected_Node.pos[1],
                              self.current_pos[0],self.current_pos[1])
             painter.setPen(bkp)
+
     def new(self, engine):
         """
         Creates a new engine
@@ -140,7 +154,9 @@ class QGraphViz(QWidget):
         return None
 
     def load_file(self, filename):
-        self.main_graph = self.parser.parseFile(filename)
+        self.engine.graph = self.parser.parseFile(filename)
+        self.build()
+        self.update()
 
     def save(self, filename):
         self.parser.save(filename, self.engine.graph)
@@ -185,10 +201,12 @@ class QGraphViz(QWidget):
             if self.selected_Node is not None and self.mouse_down:
                 n = self.findNode(x,y)
                 if(n!=self.selected_Node and n is not None):
-                    self.addEdge(self.selected_Node, n)
-                    self.build()
+                    add_the_edge=True
                     if(self.new_edge_created_callback is not None):
-                        self.new_edge_created_callback(self.selected_Node,n)
+                        add_the_edge=self.new_edge_created_callback(self.selected_Node,n)
+                    if add_the_edge:
+                        self.addEdge(self.selected_Node, n)
+                        self.build()
                 self.selected_Node=None
 
         QWidget.mouseReleaseEvent(self, event)
