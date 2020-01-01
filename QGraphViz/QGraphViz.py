@@ -127,8 +127,9 @@ class QGraphViz(QWidget):
         self.engine.graph.nodes.append(node)
         return node
 
-    def addEdge(self, source, dest):
+    def addEdge(self, source, dest, kwargs):
         edge = Edge(source, dest)
+        edge.kwargs=kwargs
         self.engine.graph.edges.append(edge)
 
     def removeNode(self, node):
@@ -203,9 +204,9 @@ class QGraphViz(QWidget):
                 if(n!=self.selected_Node and n is not None):
                     add_the_edge=True
                     if(self.new_edge_created_callback is not None):
-                        add_the_edge=self.new_edge_created_callback(self.selected_Node,n)
+                        add_the_edge, kwargs=self.new_edge_created_callback(self.selected_Node, n)
                     if add_the_edge:
-                        self.addEdge(self.selected_Node, n)
+                        self.addEdge(self.selected_Node, n, kwargs)
                         self.build()
                 self.selected_Node=None
 

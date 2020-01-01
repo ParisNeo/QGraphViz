@@ -18,31 +18,49 @@ class DotParser():
         pass
     def split(self, s):
         parts = []
+        dquotes_level = 0
+        quotes_level = 0
         bracket_level = 0
+        braces_level = 0
         current = []
         # trick to remove special-case of trailing chars
         for c in (s + ","):
-            if c == "," and bracket_level == 0:
+            if c == "," and braces_level == 0 and bracket_level == 0 and quotes_level == 0 and dquotes_level == 0:
                 parts.append("".join(current))
                 current = []
             else:
+                if c == "\"":
+                    if dquotes_level==0:
+                        dquotes_level += 1
+                    else:
+                        dquotes_level = 0
+                if c == "'":
+                    if quotes_level==0:
+                        quotes_level += 1
+                    else:
+                        quotes_level = 0
                 if c == "{":
                     bracket_level += 1
                 elif c == "}":
                     bracket_level -= 1
+
+                if c == "[":
+                    braces_level += 1
+                elif c == "]":
+                    braces_level -= 1
                 current.append(c)
-        return parts    
+        return parts
+
     def find_params(self, data):
         try:
             start_idx=data.index("[")
             end_index=data.rindex("]")
 
             strparams = self.split(data[start_idx+1:end_index])#.split(",")
-
             params={}
             for param in strparams:
                 vals = param.split("=")
-                params[vals[0].strip()] = vals[1].strip()
+                params[vals[0].strip()] = "=".join(vals[1:]).strip()
             return params, start_idx, end_index
         except:
             return None, 0, 0
