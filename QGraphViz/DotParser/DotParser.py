@@ -83,6 +83,10 @@ class DotParser():
                 dest_node  = graph.getNodeByName(dest_node_name)
                 if(source_node is not None and dest_node is not None):
                     edge = Edge(source_node, dest_node)
+                    if(params is None):
+                        edge.kwargs={}
+                    else:
+                        edge.kwargs=params
                     graph.edges.append(edge)
             except:
                 try:

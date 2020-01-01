@@ -74,7 +74,7 @@ class QGraphViz(QWidget):
                 pen.setColor(QColor("black"))
 
             if("width" in edge.kwargs.keys()):
-                pen.setWidth(edge.kwargs["width"])
+                pen.setWidth(int(edge.kwargs["width"]))
             else:
                 pen.setWidth(1)
 
@@ -89,7 +89,7 @@ class QGraphViz(QWidget):
                 pen.setColor(QColor(node.kwargs["color"]))
             else:
                 pen.setColor(QColor("black"))
-                
+
             painter.setBrush(brush)
             if("shape" in node.kwargs.keys()):
                 if(node.kwargs["shape"]=="box"):
