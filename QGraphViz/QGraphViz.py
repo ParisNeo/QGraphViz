@@ -65,15 +65,32 @@ class QGraphViz(QWidget):
         painter = QPainter(self) 
         painter.setFont(self.engine.font)
         brush = QBrush(Qt.SolidPattern)
-        brush.setColor(Qt.white)
         pen=QPen()
-        painter.setBrush(brush)
+        brush.setColor(Qt.white)
         for edge in self.engine.graph.edges:
+            if("color" in edge.kwargs.keys()):
+                pen.setColor(QColor(edge.kwargs["color"]))
+            else:
+                pen.setColor(QColor("black"))
+
+            if("width" in edge.kwargs.keys()):
+                pen.setWidth(edge.kwargs["width"])
+            else:
+                pen.setWidth(1)
+
+            painter.setPen(pen)
+            painter.setBrush(brush)
             painter.drawLine(edge.source.pos[0],edge.source.pos[1],
             edge.dest.pos[0],
             edge.dest.pos[1])
          # TODO : implement painting graph using DOT engine
         for node in self.engine.graph.nodes:
+            if("color" in node.kwargs.keys()):
+                pen.setColor(QColor(node.kwargs["color"]))
+            else:
+                pen.setColor(QColor("black"))
+                
+            painter.setBrush(brush)
             if("shape" in node.kwargs.keys()):
                 if(node.kwargs["shape"]=="box"):
                     painter.drawRect(
@@ -91,12 +108,7 @@ class QGraphViz(QWidget):
                             node.pos[0]-node.size[0]/2,
                             node.pos[1]-node.size[1]/2,
                             node.size[0], node.size[1])
-            if("color" in node.kwargs.keys()):
-                pen.setColor(QColor(node.kwargs["color"]))
-            else:
-                pen.setColor(QColor("black"))
 
-            painter.setPen(pen)
 
             if("label" in node.kwargs.keys()):
                 painter.drawText(

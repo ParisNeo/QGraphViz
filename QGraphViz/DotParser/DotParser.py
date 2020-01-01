@@ -64,16 +64,16 @@ class DotParser():
             return params, start_idx, end_index
         except:
             return None, 0, 0
-    def parse_subdata(self, data, graph):
+    def parse_subdata(self, data, graph, connection_sign="--"):
         try:
             end_index=data.index(";")
             sub_data = data[:end_index]
             try:
-                link_idx=sub_data.index("--")
+                link_idx=sub_data.index(connection_sign)
                 # find parameters
-
                 source_node_name = sub_data[:link_idx].strip()
                 params, params_start_idx, params_end_index =self.find_params(sub_data)
+                
                 if(params is not None):
                     dest_node_name = sub_data[link_idx+3:params_start_idx].strip()
                 else:
@@ -100,7 +100,7 @@ class DotParser():
                 except:
                     pass
             if(end_index<len(data)):
-                self.parse_subdata(data[end_index+1:], graph)
+                self.parse_subdata(data[end_index+1:], graph, connection_sign)
         except:
             pass
 
@@ -110,11 +110,13 @@ class DotParser():
             data=fi.read()
             try:
                 graph_idx= data.index("dgraph")
+                connection_sign = "->"
                 print("found dgraph at {}".format(graph_idx))
                 graph=Graph(GraphType.DirectedGraph)
             except:
                 try:
                     graph_idx= data.index("graph")
+                    connection_sign = "--"
                     print("found dgraph at {}".format(graph_idx))
                     graph=Graph()
                 except:
@@ -122,26 +124,25 @@ class DotParser():
             data=data[graph_idx+5:]
             start_id=data.index("{")
             end_id=data.rindex("}")
-            self.parse_subdata(data[start_id+1:end_id], graph)
+            self.parse_subdata(data[start_id+1:end_id], graph, connection_sign)
         return graph
 
+    def populate_file(self, graph, connection_sign, fi):
+        for node in graph.nodes:
+            fi.write("    {} [{}];\n".format(node.name, ",".join(["{}={}".format(k,v) for k,v in node.kwargs.items()])))
+        for edge in graph.edges:
+            if(not edge.kwargs):
+                fi.write("    {} {} {};\n".format(edge.source.name, connection_sign, edge.dest.name))
+            else:
+                fi.write("    {} {} {} [{}];\n".format(edge.source.name, connection_sign, edge.dest.name, ",".join(["{}={}".format(k,v) for k,v in edge.kwargs.items()])))
 
     def save(self, filename, graph):
         with open(filename,"w") as fi:
             if graph.graph_type == GraphType.SimpleGraph:
                 fi.write("graph {\n")
-                for node in graph.nodes:
-                    fi.write("    {} [{}];\n".format(node.name, ",".join(["{}={}".format(k,v) for k,v in node.kwargs.items()])))
-                for edge in graph.edges:
-                    fi.write("    {} -- {};\n".format(edge.source.name, edge.dest.name))
+                self.populate_file(graph, "--", fi)
                 fi.write("}")
             if graph.graph_type == GraphType.DirectedGraph:
                 fi.write("dgraph {\n")
-                for node in graph.nodes:
-                    fi.write("    {} [{}];\n".format(node.name, ",".join(["{}={}".format(k,v) for k,v in node.kwargs.items()])))
-                for edge in graph.edges:
-                    if(not edge.kwargs):
-                        fi.write("    {} -> {};\n".format(edge.source.name, edge.dest.name))
-                    else:
-                        fi.write("    {} -> {} [{}];\n".format(edge.source.name, edge.dest.name, ",".join(["{}={}".format(k,v) for k,v in edge.kwargs.items()])))
+                self.populate_file(graph, "->", fi)
                 fi.write("}")

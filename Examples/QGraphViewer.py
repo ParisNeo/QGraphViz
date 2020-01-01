@@ -43,12 +43,12 @@ if __name__ == "__main__":
     n5 = qgv.addNode("Node5", label="N5")
     n6 = qgv.addNode("Node6", label="N6")
 
-    qgv.addEdge(n1, n2)
-    qgv.addEdge(n3, n2)
-    qgv.addEdge(n2, n4)
-    qgv.addEdge(n4, n5)
-    qgv.addEdge(n4, n6)
-    qgv.addEdge(n3, n6)
+    qgv.addEdge(n1, n2, {})
+    qgv.addEdge(n3, n2, {})
+    qgv.addEdge(n2, n4, {"width":2})
+    qgv.addEdge(n4, n5, {"width":4})
+    qgv.addEdge(n4, n6, {"width":5,"color":"red"})
+    qgv.addEdge(n3, n6, {"width":2})
 
     # Build the graph (the layout engine organizes where the nodes and connections are)
     qgv.build()
