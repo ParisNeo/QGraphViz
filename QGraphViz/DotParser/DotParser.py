@@ -135,5 +135,8 @@ class DotParser():
                 for node in graph.nodes:
                     fi.write("    {} [{}];\n".format(node.name, ",".join(["{}={}".format(k,v) for k,v in node.kwargs.items()])))
                 for edge in graph.edges:
-                    fi.write("    {} -> {};\n".format(edge.source.name, edge.dest.name))
+                    if(not edge.kwargs):
+                        fi.write("    {} -> {};\n".format(edge.source.name, edge.dest.name))
+                    else:
+                        fi.write("    {} -> {} [{}];\n".format(edge.source.name, edge.dest.name, ",".join(["{}={}".format(k,v) for k,v in edge.kwargs.items()])))
                 fi.write("}")
