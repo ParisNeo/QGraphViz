@@ -73,7 +73,12 @@ class DotParser():
                 # find parameters
 
                 source_node_name = sub_data[:link_idx].strip()
-                dest_node_name = sub_data[link_idx+3:end_index].strip()
+                params, params_start_idx, params_end_index =self.find_params(sub_data)
+                if(params is not None):
+                    dest_node_name = sub_data[link_idx+3:params_start_idx].strip()
+                else:
+                    dest_node_name = sub_data[link_idx+3:end_index].strip()
+
                 source_node  = graph.getNodeByName(source_node_name)
                 dest_node  = graph.getNodeByName(dest_node_name)
                 if(source_node is not None and dest_node is not None):
