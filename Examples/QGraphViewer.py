@@ -20,19 +20,30 @@ from QGraphViz.Engines import Dot
 if __name__ == "__main__":
     # Create QT application
     app = QApplication(sys.argv)
-    # What node is selected ?
-    current_node=None
     # Events
     def node_selected(node):
         if(qgv.manipulation_mode==QGraphVizManipulationMode.Node_remove_Mode):
             print("Node {} removed".format(node))
         else:
-            current_Node=node
-            print("Node selected")
+            print("Node selected {}".format(node))
+
+    def edge_selected(edge):
+        if(qgv.manipulation_mode==QGraphVizManipulationMode.Edge_remove_Mode):
+            print("Edge {} removed".format(edge))
+        else:
+            print("Edge selected {}".format(edge))
+
     def node_invoked(node):
         print("Node double clicked")
+    def edge_invoked(node):
+        print("Edge double clicked")
     # Create QGraphViz widget
-    qgv = QGraphViz(node_selected_callback=node_selected,node_invoked_callback=node_invoked)
+    qgv = QGraphViz(
+        node_selected_callback=node_selected,
+        edge_selected_callback=edge_selected,
+        node_invoked_callback=node_invoked,
+        edge_invoked_callback=edge_invoked,
+        )
     # Create A new Graph using Dot layout engine
     qgv.new(Dot(Graph()))
     # Define sone graph
@@ -134,35 +145,65 @@ if __name__ == "__main__":
         if dlg.OK and dlg.node_name != '':
                 qgv.addNode(dlg.node_name, label=dlg.node_label, shape=dlg.node_type)
                 qgv.build()
+
     def rem_node():
         qgv.manipulation_mode=QGraphVizManipulationMode.Node_remove_Mode
+        for btn in buttons_list:
+            btn.setChecked(False)
+        btnRemNode.setChecked(True)
+
+    def rem_edge():
+        qgv.manipulation_mode=QGraphVizManipulationMode.Edge_remove_Mode
+        for btn in buttons_list:
+            btn.setChecked(False)
+        btnRemEdge.setChecked(True)
 
     def add_edge():
-        qgv.manipulation_mode=QGraphVizManipulationMode.Edges_Conect_Mode
+        qgv.manipulation_mode=QGraphVizManipulationMode.Edges_Connect_Mode
+        for btn in buttons_list:
+            btn.setChecked(False)
+        btnAddEdge.setChecked(True)
 
-    def remove_Node():
-        qgv.manipulation_mode=QGraphVizManipulationMode.Edges_Conect_Mode
-        print("Removing nodes")
-
-    btnManip = QPushButton("Manipulate")    
-    btnManip.clicked.connect(manipulate)
-    hpanel.addWidget(btnManip)
+    
     btnOpen = QPushButton("Open")    
     btnOpen.clicked.connect(load)
     btnSave = QPushButton("Save")    
     btnSave.clicked.connect(save)
     hpanel.addWidget(btnOpen)
     hpanel.addWidget(btnSave)
+
+    buttons_list=[]
+    btnManip = QPushButton("Manipulate")    
+    btnManip.setCheckable(True)
+    btnManip.setChecked(True)
+    btnManip.clicked.connect(manipulate)
+    hpanel.addWidget(btnManip)
+    buttons_list.append(btnManip)
+
     btnAddNode = QPushButton("Add Node")    
+    btnAddNode.setCheckable(True)
     btnAddNode.clicked.connect(add_node)
     hpanel.addWidget(btnAddNode)
+    buttons_list.append(btnManip)
+
     btnRemNode = QPushButton("Rem Node")    
+    btnRemNode.setCheckable(True)
     btnRemNode.clicked.connect(rem_node)
     hpanel.addWidget(btnRemNode)
+    buttons_list.append(btnRemNode)
 
     btnAddEdge = QPushButton("Add Edge")    
+    btnAddEdge.setCheckable(True)
     btnAddEdge.clicked.connect(add_edge)
     hpanel.addWidget(btnAddEdge)
+    buttons_list.append(btnAddEdge)
+
+    btnRemEdge = QPushButton("Rem Edge")    
+    btnRemEdge.setCheckable(True)
+    btnRemEdge.clicked.connect(rem_edge)
+    hpanel.addWidget(btnRemEdge)
+    buttons_list.append(btnRemEdge)
+
     w.showMaximized()
     
     sys.exit(app.exec_())

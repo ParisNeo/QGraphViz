@@ -38,11 +38,11 @@ pip install QGraphViz
 5. The application can accept or refuse edges creation and even add custom parameters to the edges
 6. The nodes can be double clicked and an event is sent to the application allowing it to do custom
 7. User application is informed wen a new connection is created between two nodes, when a node is selected or when it is double clicked.
-8. Only two supported node shapes (box or oval)
-9. File parsing is not implemented yet
-10. Advanced nodes coloring and shapes are not yet implemented
+8. User application is informed when a edge is selected or double clicked.
+9. Only two supported node shapes (box or oval)
+10. Advanced nodes shapes are not yet implemented
 11. Subgraphs are not supported yet
-12. Only the dot layout is partially implemented
+12. Only the dot layout is implemented
 
 ## Example code
 You can find an example code for manipulating graphs in examples/QGraphViewer.py.

@@ -13,12 +13,14 @@ import sys
 import enum
 import datetime
 from QGraphViz.DotParser import DotParser, Node, Edge, Graph
-
+import math
 
 class QGraphVizManipulationMode(enum.Enum):
-    Nodes_Move_Mode=0
-    Edges_Conect_Mode=1
-    Node_remove_Mode=2
+    Static=0
+    Nodes_Move_Mode=1
+    Edges_Connect_Mode=2
+    Node_remove_Mode=3
+    Edge_remove_Mode=4
 
 class QGraphViz(QWidget):
     """
@@ -31,7 +33,9 @@ class QGraphViz(QWidget):
                     manipulation_mode=QGraphVizManipulationMode.Nodes_Move_Mode,
                     new_edge_created_callback=None, # A callbakc called when a new connection is created between two nodes using the GUI
                     node_selected_callback=None, # A callback called when a node is clicked
-                    node_invoked_callback=None # A callback called when a node is double clicked
+                    edge_selected_callback=None, # A callback called when an edge is clicked
+                    node_invoked_callback=None, # A callback called when a node is double clicked
+                    edge_invoked_callback=None, # A callback called when an edge is double clicked
                 ):
         QWidget.__init__(self,parent)
         self.parser = DotParser()
@@ -43,10 +47,13 @@ class QGraphViz(QWidget):
         self.selected_Node = None  
         self.current_pos = [0,0]
         self.mouse_down=False
+        self.min_cursor_edge_dist=3
+
         self.new_edge_created_callback = new_edge_created_callback
         self.node_selected_callback = node_selected_callback
+        self.edge_selected_callback = edge_selected_callback
         self.node_invoked_callback = node_invoked_callback
-
+        self.edge_invoked_callback = edge_invoked_callback
 
     def build(self):
         self.engine.build()
@@ -83,6 +90,7 @@ class QGraphViz(QWidget):
             painter.drawLine(edge.source.pos[0],edge.source.pos[1],
             edge.dest.pos[0],
             edge.dest.pos[1])
+
          # TODO : implement painting graph using DOT engine
         for node in self.engine.graph.nodes:
             if("color" in node.kwargs.keys()):
@@ -90,6 +98,7 @@ class QGraphViz(QWidget):
             else:
                 pen.setColor(QColor("black"))
 
+            painter.setPen(pen)
             painter.setBrush(brush)
             if("shape" in node.kwargs.keys()):
                 if(node.kwargs["shape"]=="box"):
@@ -117,7 +126,7 @@ class QGraphViz(QWidget):
                     node.size[0], node.size[1],
                     Qt.AlignCenter|Qt.AlignTop,node.kwargs["label"])
 
-        if( self.manipulation_mode==QGraphVizManipulationMode.Edges_Conect_Mode and 
+        if( self.manipulation_mode==QGraphVizManipulationMode.Edges_Connect_Mode and 
             self.mouse_down and 
             self.selected_Node is not None):
             bkp = painter.pen()
@@ -157,6 +166,23 @@ class QGraphViz(QWidget):
             del self.engine.graph.nodes[idx]
             self.repaint()
 
+    def removeEdge(self, edge):
+        if(edge in self.engine.graph.edges):
+            source = edge.source
+            dest = edge.dest
+
+            idx = source.out_edges.index(edge)
+            del source.out_edges[idx]
+
+            idx = dest.in_edges.index(edge)
+            del dest.in_edges[idx]
+
+            idx = self.engine.graph.edges.index(edge)
+            del self.engine.graph.edges[idx]
+
+            self.repaint()
+
+
     def findNode(self, x, y):
         for n in self.engine.graph.nodes:
             if(
@@ -166,6 +192,32 @@ class QGraphViz(QWidget):
                 return n
         return None
 
+    def findEdge(self, x, y):
+        for e in self.engine.graph.edges:
+            sx=e.source.pos[0] if e.source.pos[0]< e.dest.pos[0] else e.dest.pos[0]
+            sy=e.source.pos[1] if e.source.pos[1]< e.dest.pos[1] else e.dest.pos[1]
+
+            ex=e.source.pos[0] if e.source.pos[0]> e.dest.pos[0] else e.dest.pos[0]
+            ey=e.source.pos[1] if e.source.pos[1]> e.dest.pos[1] else e.dest.pos[1]
+
+            if(x>sx-self.min_cursor_edge_dist and x<ex+self.min_cursor_edge_dist and
+               y>sy-self.min_cursor_edge_dist and y<ey+self.min_cursor_edge_dist):
+                x2 = x-sx 
+                y2 = y-sy 
+                dx = (ex-sx)
+                dy = (ey-sy)
+                if(dx == 0):
+                    if(abs(x2)<self.min_cursor_edge_dist):
+                        return e
+                elif(dy == 0):
+                    if(abs(y2)<self.min_cursor_edge_dist):
+                        return e
+                else:
+                    a = -dy/dx
+                    if(abs(a*x2+y2)/math.sqrt(a**2)<self.min_cursor_edge_dist):
+                        return e
+
+        return None
     def load_file(self, filename):
         self.engine.graph = self.parser.parseFile(filename)
         self.build()
@@ -176,11 +228,18 @@ class QGraphViz(QWidget):
 
 
     def mouseDoubleClickEvent(self, event):
-        if(self.node_invoked_callback is not None):
-            x = event.x()
-            y = event.y()
-            n = self.findNode(x,y)
-            self.node_invoked_callback(n)
+        x = event.x()
+        y = event.y()
+        n = self.findNode(x,y)
+        if n is not None:
+            if(self.node_invoked_callback is not None):
+                self.node_invoked_callback(n)
+        else:
+            e = self.findEdge(x, y)
+            if e is not None:
+                if(self.edge_invoked_callback is not None):
+                    self.edge_invoked_callback(e)
+
         QWidget.mouseDoubleClickEvent(self, event)
 
     def mousePressEvent(self, event):
@@ -210,13 +269,19 @@ class QGraphViz(QWidget):
         x = event.x()
         y = event.y()
         n = self.findNode(x,y)        
-        if(self.manipulation_mode==QGraphVizManipulationMode.Edges_Conect_Mode):
+        if n is None:
+            e = self.findEdge(x,y)        
+        else:
+            e = None
+
+        if(self.manipulation_mode==QGraphVizManipulationMode.Edges_Connect_Mode):
             if self.selected_Node is not None and self.mouse_down:
-                n = self.findNode(x,y)
                 if(n!=self.selected_Node and n is not None):
                     add_the_edge=True
                     if(self.new_edge_created_callback is not None):
                         add_the_edge, kwargs=self.new_edge_created_callback(self.selected_Node, n)
+                    else:
+                        kwargs={}
                     if add_the_edge:
                         self.addEdge(self.selected_Node, n, kwargs)
                         self.build()
@@ -229,8 +294,20 @@ class QGraphViz(QWidget):
                 self.build()
                 self.repaint()
 
-        if(self.node_selected_callback is not None):
-            self.node_selected_callback(n)
+        if(self.manipulation_mode==QGraphVizManipulationMode.Edge_remove_Mode):
+            if(e is not None):
+                self.removeEdge(e)
+                self.build()
+                self.repaint()
+
+        # Inform application
+        if(n is not None):
+            if(self.node_selected_callback is not None):
+                self.node_selected_callback(n)
+
+        if( e is not None):
+            if(self.edge_selected_callback is not None):
+                self.edge_selected_callback(e)
 
         self.mouse_down=False
         self.repaint()
