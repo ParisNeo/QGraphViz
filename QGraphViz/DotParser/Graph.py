@@ -7,19 +7,23 @@ Description:
 Grapph object
 """
 import enum
+from QGraphViz.DotParser.Node import Node
 
 class GraphType(enum.Enum):
     SimpleGraph=0
     DirectedGraph=1        
 
-class Graph():
+class Graph(Node):
     """
     The graph object made of nodes, edges and subgraphs 
     """
-    def __init__(self, graph_type = GraphType.SimpleGraph):
+    def __init__(self, name, graph_type = GraphType.SimpleGraph, parent_graph=None,  **kwargs):
+        Node.__init__(self, name, parent_graph, **kwargs)
+        self.parent_graph = parent_graph
+        self.current_x=0
+        self.current_y=0
         self.nodes=[]
         self.edges=[]
-        self.subgraphs=[]
         self.graph_type = graph_type
 
     def addNode(self, node):
@@ -35,14 +39,7 @@ class Graph():
         :param edge: An edge to be added to the graph
         """
         self.nodes.append(edge)
-
-    def addSubgraph(self, subgraph):
-        """
-        Adds a subgraph to the graph
-        :param subgraph: The subgraph to be added 
-        """
-        self.nodes.append(subgraph)
-    
+   
     def getNodeByName(self, name):
         nodenames = [n.name for n in self.nodes]
         if name in nodenames:

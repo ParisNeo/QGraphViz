@@ -14,7 +14,7 @@ import os
 sys.path.insert(1,os.path.dirname(__file__)+"/..")
 print(sys.path)
 from QGraphViz.QGraphViz import QGraphViz, QGraphVizManipulationMode
-from QGraphViz.DotParser import Graph
+from QGraphViz.DotParser import Graph, GraphType
 from QGraphViz.Engines import Dot
 
 if __name__ == "__main__":
@@ -39,20 +39,23 @@ if __name__ == "__main__":
         print("Edge double clicked")
     # Create QGraphViz widget
     qgv = QGraphViz(
+        show_subgraphs=False,
         node_selected_callback=node_selected,
         edge_selected_callback=edge_selected,
         node_invoked_callback=node_invoked,
         edge_invoked_callback=edge_invoked,
         )
     # Create A new Graph using Dot layout engine
-    qgv.new(Dot(Graph()))
+    qgv.new(Dot(Graph("Main_Graph")))
     # Define sone graph
-    n1 = qgv.addNode("Node1", label="N1")
-    n2 = qgv.addNode("Node2", label="N2")
-    n3 = qgv.addNode("Node3", label="N3")
-    n4 = qgv.addNode("Node4", label="N4")
-    n5 = qgv.addNode("Node5", label="N5")
-    n6 = qgv.addNode("Node6", label="N6")
+    n1 = qgv.addNode(qgv.engine.graph, "Node1", label="N1")
+    n2 = qgv.addNode(qgv.engine.graph, "Node2", label="N2")
+    n3 = qgv.addNode(qgv.engine.graph, "Node3", label="N3")
+    n4 = qgv.addNode(qgv.engine.graph, "Node4", label="N4")
+    n5 = qgv.addNode(qgv.engine.graph, "Node5", label="N5")
+    n6 = qgv.addNode(qgv.engine.graph, "Node6", label="N6")
+
+    sub = qgv.addSubgraph(qgv.engine.graph, "subgraph", qgv.engine.graph.graph_type, label="Subgraph")
 
     qgv.addEdge(n1, n2, {})
     qgv.addEdge(n3, n2, {})
@@ -143,7 +146,7 @@ if __name__ == "__main__":
 
         #node_name, okPressed = QInputDialog.getText(wi, "Node name","Node name:", QLineEdit.Normal, "")
         if dlg.OK and dlg.node_name != '':
-                qgv.addNode(dlg.node_name, label=dlg.node_label, shape=dlg.node_type)
+                qgv.addNode(qgv.engine.graph, dlg.node_name, label=dlg.node_label, shape=dlg.node_type)
                 qgv.build()
 
     def rem_node():
@@ -151,6 +154,7 @@ if __name__ == "__main__":
         for btn in buttons_list:
             btn.setChecked(False)
         btnRemNode.setChecked(True)
+
 
     def rem_edge():
         qgv.manipulation_mode=QGraphVizManipulationMode.Edge_remove_Mode
@@ -164,7 +168,63 @@ if __name__ == "__main__":
             btn.setChecked(False)
         btnAddEdge.setChecked(True)
 
+    def add_subgraph():
+        dlg = QDialog()
+        dlg.ok=False
+        dlg.subgraph_name=""
+        dlg.subgraph_label=""
+        dlg.subgraph_type="None"
+        # Layouts
+        main_layout = QVBoxLayout()
+        l = QFormLayout()
+        buttons_layout = QHBoxLayout()
+
+        main_layout.addLayout(l)
+        main_layout.addLayout(buttons_layout)
+        dlg.setLayout(main_layout)
+
+        leSubgraphName = QLineEdit()
+        leSubgraphLabel = QLineEdit()
+
+        pbOK = QPushButton()
+        pbCancel = QPushButton()
+
+        pbOK.setText("&OK")
+        pbCancel.setText("&Cancel")
+
+        l.setWidget(0, QFormLayout.LabelRole, QLabel("Subgraph Name"))
+        l.setWidget(0, QFormLayout.FieldRole, leSubgraphName)
+        l.setWidget(1, QFormLayout.LabelRole, QLabel("Subgraph Label"))
+        l.setWidget(1, QFormLayout.FieldRole, leSubgraphLabel)
+  
+        def ok():
+            dlg.OK=True
+            dlg.subgraph_name = leSubgraphName.text()
+            dlg.subgraph_label = leSubgraphLabel.text()
+            dlg.close()
     
+        def cancel():
+            dlg.OK=False
+            dlg.close()
+
+        pbOK.clicked.connect(ok)
+        pbCancel.clicked.connect(cancel)
+
+        buttons_layout.addWidget(pbOK)
+        buttons_layout.addWidget(pbCancel)
+        dlg.exec_()
+
+        if dlg.OK and dlg.subgraph_name != '':
+                qgv.addSubgraph(qgv.engine.graph, dlg.subgraph_name, subgraph_type= GraphType.SimpleGraph, label=dlg.subgraph_label)
+                qgv.build()
+
+    def rem_subgraph():
+        qgv.manipulation_mode=QGraphVizManipulationMode.Subgraph_remove_Mode
+        for btn in buttons_list:
+            btn.setChecked(False)
+        btnRemSubGraph.setChecked(True)
+
+    # Add buttons                
     btnOpen = QPushButton("Open")    
     btnOpen.clicked.connect(load)
     btnSave = QPushButton("Save")    
@@ -181,7 +241,6 @@ if __name__ == "__main__":
     buttons_list.append(btnManip)
 
     btnAddNode = QPushButton("Add Node")    
-    btnAddNode.setCheckable(True)
     btnAddNode.clicked.connect(add_node)
     hpanel.addWidget(btnAddNode)
     buttons_list.append(btnManip)
@@ -203,6 +262,16 @@ if __name__ == "__main__":
     btnRemEdge.clicked.connect(rem_edge)
     hpanel.addWidget(btnRemEdge)
     buttons_list.append(btnRemEdge)
+
+    btnAddSubGraph = QPushButton("Add Subgraph")    
+    btnAddSubGraph.clicked.connect(add_subgraph)
+    hpanel.addWidget(btnAddSubGraph)
+
+    btnRemSubGraph = QPushButton("Rem Subgraph")    
+    btnRemSubGraph.setCheckable(True)
+    btnRemSubGraph.clicked.connect(rem_subgraph)
+    hpanel.addWidget(btnRemSubGraph)
+    buttons_list.append(btnRemSubGraph)
 
     w.showMaximized()
     

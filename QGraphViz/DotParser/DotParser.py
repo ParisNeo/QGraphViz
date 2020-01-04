@@ -64,10 +64,13 @@ class DotParser():
             return params, start_idx, end_index
         except:
             return None, 0, 0
+
     def parse_subdata(self, data, graph, connection_sign="--"):
         try:
             end_index=data.index(";")
             sub_data = data[:end_index]
+            # Try to find a subgraph
+            # Try to find an edge connection
             try:
                 link_idx=sub_data.index(connection_sign)
                 # find parameters
@@ -109,20 +112,20 @@ class DotParser():
             pass
 
     def parseFile(self, filename):
-        graph=Graph()
+        graph=Graph("main_graph")
         with open(filename,"r") as fi:
             data=fi.read()
             try:
                 graph_idx= data.index("dgraph")
                 connection_sign = "->"
                 print("found dgraph at {}".format(graph_idx))
-                graph=Graph(GraphType.DirectedGraph)
+                graph=Graph("main_graph",GraphType.DirectedGraph)
             except:
                 try:
                     graph_idx= data.index("graph")
                     connection_sign = "--"
                     print("found dgraph at {}".format(graph_idx))
-                    graph=Graph()
+                    graph=Graph("main_graph")
                 except:
                     raise Exception("Syntax error")
             data=data[graph_idx+5:]
@@ -133,7 +136,13 @@ class DotParser():
 
     def populate_file(self, graph, connection_sign, fi):
         for node in graph.nodes:
-            fi.write("    {} [{}];\n".format(node.name, ",".join(["{}={}".format(k,v) for k,v in node.kwargs.items()])))
+            if(type(node)==Graph):
+                fi.write("    subgraph cluster_{}".format(node.name))
+                fi.write("{\n")
+                self.populate_file(node, connection_sign, fi)
+                fi.write("    };\n")
+            else:
+                fi.write("    {} [{}];\n".format(node.name, ",".join(["{}={}".format(k,v) for k,v in node.kwargs.items()])))
         for edge in graph.edges:
             if(not edge.kwargs):
                 fi.write("    {} {} {};\n".format(edge.source.name, connection_sign, edge.dest.name))
