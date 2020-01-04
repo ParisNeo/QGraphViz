@@ -44,5 +44,14 @@ pip install QGraphViz
 11. Subgraphs are not supported yet
 12. Only the dot layout is implemented
 
+
 ## Example code
 You can find an example code for manipulating graphs in examples/QGraphViewer.py.
+
+## Changelog
+### V 0.0.19 :
+Bugfix in opening files with clusters
+Cluster paramters syntax is still incompatible with Standard GraphViz syntax:
+    subgraph [parameters]{
+        put nodes here
+    }

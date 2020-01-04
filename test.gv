@@ -5,8 +5,8 @@ graph {
     Node4 [label=N4];
     Node5 [label=N5];
     Node6 [label=N6];
-    subgraph cluster_subgraph{
-    };
+    subgraph cluster_subgraph [label=Subgraph]{
+    }
     Node1 -- Node2;
     Node3 -- Node2;
     Node2 -- Node4 [width=2];

@@ -69,9 +69,32 @@ class DotParser():
         try:
             end_index=data.index(";")
             sub_data = data[:end_index]
-            # Try to find a subgraph
+            
+            if len(sub_data.strip())==0:
+                if(end_index<len(data)):
+                    self.parse_subdata(data[end_index+1:], graph, connection_sign)
+                return
+                
+            if("subgraph" in sub_data):
+                internal_index=data.index("{")
+                end_index=data.index("}")
+                sub_data = data[:end_index]
+                subgraph_name = data[sub_data.index("subgraph")+9:internal_index].strip()
+                params, params_start_idx, params_end_index =self.find_params(subgraph_name)
+                if(params is not None):
+                    subname = data[sub_data.index("subgraph")+9:params_start_idx].strip()
+                else:
+                    subname = data[sub_data.index("subgraph")+9:end_index-1].strip()
+
+                node = Graph(subname, graph.graph_type, graph)
+                if(params is not None):
+                    node.kwargs = params
+                graph.nodes.append(node)
+
+                self.parse_subdata(data[internal_index+1:end_index], graph, connection_sign)
+                # Try to find a subgraph
+            elif(connection_sign in sub_data):
             # Try to find an edge connection
-            try:
                 link_idx=sub_data.index(connection_sign)
                 # find parameters
                 source_node_name = sub_data[:link_idx].strip()
@@ -91,24 +114,23 @@ class DotParser():
                     else:
                         edge.kwargs=params
                     graph.edges.append(edge)
-            except:
-                try:
-                    params, params_start_idx, params_end_index =self.find_params(sub_data)
-                    if(params is not None):
-                        subname = data[0:params_start_idx].strip()
-                    else:
-                        subname = data[0:end_index].strip()
+            else:
+                params, params_start_idx, params_end_index =self.find_params(sub_data)
+                if(params is not None):
+                    subname = data[0:params_start_idx].strip()
+                else:
+                    subname = data[0:end_index].strip()
 
-                    node = Node(subname)
+                node = Node(subname, graph)
+                if(params is not None):
                     node.kwargs = params
-                    graph.nodes.append(node)
+                graph.nodes.append(node)
 
 
-                except:
-                    pass
             if(end_index<len(data)):
                 self.parse_subdata(data[end_index+1:], graph, connection_sign)
-        except:
+        except Exception as ex:
+            print(ex)
             pass
 
     def parseFile(self, filename):
@@ -137,10 +159,10 @@ class DotParser():
     def populate_file(self, graph, connection_sign, fi):
         for node in graph.nodes:
             if(type(node)==Graph):
-                fi.write("    subgraph cluster_{}".format(node.name))
+                fi.write("    subgraph cluster_{} [{}]".format(node.name, ",".join(["{}={}".format(k,v) for k,v in node.kwargs.items()])))
                 fi.write("{\n")
                 self.populate_file(node, connection_sign, fi)
-                fi.write("    };\n")
+                fi.write("    }\n")
             else:
                 fi.write("    {} [{}];\n".format(node.name, ",".join(["{}={}".format(k,v) for k,v in node.kwargs.items()])))
         for edge in graph.edges:

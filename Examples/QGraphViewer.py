@@ -88,6 +88,10 @@ if __name__ == "__main__":
         if(fname[0]!=""):
             qgv.save(fname[0])
         
+    def new():
+        qgv.engine.graph = Graph("MainGraph")
+        qgv.build()
+        qgv.repaint()
     def load():
         fname = QFileDialog.getOpenFileName(qgv, "Open", "", "*.gv")
         if(fname[0]!=""):
@@ -225,10 +229,15 @@ if __name__ == "__main__":
         btnRemSubGraph.setChecked(True)
 
     # Add buttons                
+    btnNew = QPushButton("New")    
+    btnNew.clicked.connect(new)
     btnOpen = QPushButton("Open")    
     btnOpen.clicked.connect(load)
+
     btnSave = QPushButton("Save")    
     btnSave.clicked.connect(save)
+
+    hpanel.addWidget(btnNew)    
     hpanel.addWidget(btnOpen)
     hpanel.addWidget(btnSave)
 
