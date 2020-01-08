@@ -1,16 +1,17 @@
 graph {
-    Node1 [label=N1];
-    Node2 [label=N2];
-    Node3 [label=N3];
-    Node4 [label=N4];
-    Node5 [label=N5];
-    Node6 [label=N6];
-    subgraph cluster_subgraph [label=Subgraph]{
+    Node1 [label=N1]
+    Node2 [label=N2]
+    Node3 [label=N3]
+    Node4 [label=N4]
+    Node5 [label=N5]
+    Node6 [label=N6]
+    subgraph cluster_subgraph{
+label=Subgraph
     }
-    Node1 -- Node2;
-    Node3 -- Node2;
-    Node2 -- Node4 [width=2];
-    Node4 -- Node5 [width=4];
-    Node4 -- Node6 [width=5,color=red];
-    Node3 -- Node6 [width=2];
+    Node1 -- Node2
+    Node3 -- Node2
+    Node2 -- Node4 [width=2]
+    Node4 -- Node5 [width=4]
+    Node4 -- Node6 [width=5,color=red]
+    Node3 -- Node6 [width=2]
 }
