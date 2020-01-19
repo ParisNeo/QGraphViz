@@ -1,0 +1,106 @@
+{
+    "name": "Main_Graph",
+    "graph_type": 0,
+    "kwargs": {},
+    "nodes": [
+        {
+            "name": "Node1",
+            "kwargs": {
+                "label": "N1"
+            }
+        },
+        {
+            "name": "Node2",
+            "kwargs": {
+                "label": "N2"
+            }
+        },
+        {
+            "name": "Node3",
+            "kwargs": {
+                "label": "N3"
+            }
+        },
+        {
+            "name": "Node4",
+            "kwargs": {
+                "label": "N4"
+            }
+        },
+        {
+            "name": "Node5",
+            "kwargs": {
+                "label": "N5"
+            }
+        },
+        {
+            "name": "Node6",
+            "kwargs": {
+                "label": "N6"
+            }
+        },
+        {
+            "name": "subgraph",
+            "graph_type": 0,
+            "kwargs": {
+                "label": "Subgraph"
+            },
+            "nodes": [
+                {
+                    "name": "Node7",
+                    "kwargs": {
+                        "label": "N7"
+                    }
+                },
+                {
+                    "name": "Node8",
+                    "kwargs": {
+                        "label": "N8"
+                    }
+                }
+            ],
+            "edges": []
+        }
+    ],
+    "edges": [
+        {
+            "source": "Node1",
+            "dest": "Node2",
+            "kwargs": {}
+        },
+        {
+            "source": "Node3",
+            "dest": "Node2",
+            "kwargs": {}
+        },
+        {
+            "source": "Node2",
+            "dest": "Node4",
+            "kwargs": {
+                "width": 2
+            }
+        },
+        {
+            "source": "Node4",
+            "dest": "Node5",
+            "kwargs": {
+                "width": 4
+            }
+        },
+        {
+            "source": "Node4",
+            "dest": "Node6",
+            "kwargs": {
+                "width": 5,
+                "color": "red"
+            }
+        },
+        {
+            "source": "Node3",
+            "dest": "Node6",
+            "kwargs": {
+                "width": 2
+            }
+        }
+    ]
+}

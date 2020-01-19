@@ -44,9 +44,8 @@ class Dot(LayoutEngine):
                 miny=10000
                 maxx=0
                 maxy=0
+                self.build_graph(n)
                 for i, node in enumerate(n.nodes):
-                    if(node.processed<3):
-                        self.process(node, n, index)
 
                     if(node.pos[0]<minx):
                         minx = node.pos[0]-node.size[0]/2
@@ -64,7 +63,7 @@ class Dot(LayoutEngine):
                 height = h if h>height else height
             else:
                 graph.size=[width, height]
-                
+        
 
         n.size[0]=width
         n.size[1]=height
@@ -110,7 +109,7 @@ class Dot(LayoutEngine):
 
         for n in graph.nodes: 
             if(n.pos[0]<n.size[0]/2):
-                for node in self.graph.nodes:
+                for node in graph.nodes:
                     node.pos[0]+=(n.size[0]/2)-n.pos[0]
         
 

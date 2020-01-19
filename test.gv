@@ -7,6 +7,8 @@ graph {
     Node6 [label=N6]
     subgraph cluster_subgraph{
 label=Subgraph
+    Node7 [label=N7]
+    Node8 [label=N8]
     }
     Node1 -- Node2
     Node3 -- Node2

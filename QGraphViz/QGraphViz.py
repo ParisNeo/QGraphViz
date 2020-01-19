@@ -275,8 +275,8 @@ class QGraphViz(QWidget):
 
             self.repaint()
 
-    def findSubNode(self, x, y):
-        for node in self.engine.graph.nodes:
+    def findSubNode(self, graph, x, y):
+        for node in graph.nodes:
             gpos=node.global_pos
             if(
                 type(node)==Graph and
@@ -287,8 +287,8 @@ class QGraphViz(QWidget):
                 return node
         return None
 
-    def findNode(self, x, y):
-        for n in self.engine.graph.nodes:
+    def findNode(self, graph, x, y):
+        for n in graph.nodes:
             gpos=n.global_pos
             if(
                 gpos[0]-n.size[0]/2<x and gpos[0]+n.size[0]/2>x and
@@ -297,8 +297,8 @@ class QGraphViz(QWidget):
                 return n
         return None
 
-    def findEdge(self, x, y):
-        for e in self.engine.graph.edges:
+    def findEdge(self, graph, x, y):
+        for e in graph.edges:
             sx=e.source.pos[0] if e.source.pos[0]< e.dest.pos[0] else e.dest.pos[0]
             sy=e.source.pos[1] if e.source.pos[1]< e.dest.pos[1] else e.dest.pos[1]
 
@@ -328,19 +328,27 @@ class QGraphViz(QWidget):
         self.build()
         self.update()
 
+    def loadAJson(self, filename):
+        self.engine.graph = self.parser.fromJSON(filename)
+        self.build()
+        self.update()
+
     def save(self, filename):
         self.parser.save(filename, self.engine.graph)
+
+    def saveAsJson(self, filename):
+        self.parser.toJSON(filename, self.engine.graph)
 
 
     def mouseDoubleClickEvent(self, event):
         x = event.x()
         y = event.y()
-        n = self.findNode(x,y)
+        n = self.findNode(self.engine.graph, x,y)
         if n is not None:
             if(self.node_invoked_callback is not None):
                 self.node_invoked_callback(n)
         else:
-            e = self.findEdge(x, y)
+            e = self.findEdge(self.engine.graph, x, y)
             if e is not None:
                 if(self.edge_invoked_callback is not None):
                     self.edge_invoked_callback(e)
@@ -353,10 +361,11 @@ class QGraphViz(QWidget):
             y = event.y()
             self.current_pos = [x,y]
             self.mouse_down=True
-            n = self.findNode(x,y)
-            self.selected_Node = n                
+            n = self.findNode(self.engine.graph, x, y)
+            self.selected_Node = n 
+
             if(n is None):
-                n = self.findSubNode(x,y)
+                n = self.findSubNode(self.engine.graph, x,y)
                 self.selected_Node = n                
 
         QWidget.mousePressEvent(self, event)
@@ -377,17 +386,17 @@ class QGraphViz(QWidget):
     def mouseReleaseEvent(self, event):
         x = event.x()
         y = event.y()
-        n = self.findNode(x,y)   
+        n = self.findNode(self.engine.graph, x, y)   
         if n is None:
-            s = self.findSubNode(x,y)     
+            s = self.findSubNode(self.engine.graph, x,y)     
         if n is None:
-            e = self.findEdge(x,y)        
+            e = self.findEdge(self.engine.graph, x,y)        
         else:
             e = None
         # Manipulating nodes
         if(self.manipulation_mode==QGraphVizManipulationMode.Nodes_Move_Mode):
             if self.selected_Node is not None and self.mouse_down:
-                s = self.findSubNode(x,y)
+                s = self.findSubNode(self.engine.graph, x,y)
                 if(s is not None and s!=self.selected_Node):
                     if(type(self.selected_Node)==Node):
                         del self.selected_Node.parent_graph.nodes[self.selected_Node.parent_graph.nodes.index(self.selected_Node)]

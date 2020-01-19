@@ -11,6 +11,9 @@ from QGraphViz.DotParser.Node import Node
 from QGraphViz.DotParser.Edge import Edge
 
 from itertools import groupby
+
+import json
+
 class DotParser():
     """
     The dot language parser
@@ -188,6 +191,9 @@ class DotParser():
                     end_brackets_pos = self.find_end_brackets(line[start_brackets_pos+1:])
                     if (end_brackets_pos is not None):
                         single_line=True
+                    else:
+                        end_brackets_pos = self.find_end_brackets(data)
+
                 else:
                     name = line[9:].strip()
                 subgraph = Graph(name, graph.graph_type, graph)
@@ -195,12 +201,13 @@ class DotParser():
                 if single_line:
                     self.parse_Graph(lines[0][start_brackets_pos+1:end_brackets_pos], subgraph, connection_sign)
                 else:
-                    end_brackets_pos = self.find_end_brackets(lines[1][start_brackets_pos+1:])
+                    end_brackets_pos = self.find_end_brackets(lines[1])
                     self.parse_Graph(lines[1][:end_brackets_pos], subgraph, connection_sign)
+                    data = lines[1][end_brackets_pos:]
             else:
                 if self.isParam_line(lines[0]):
                     title,val = lines[0].split("=",1)
-                    graph.kwargs[title]=val
+                    graph.kwargs[title.strip()]=val
                     
                 elif self.isNode_line(lines[0]):
                     params, params_start_idx, params_end_index =self.find_params(lines[0])
@@ -232,6 +239,7 @@ class DotParser():
                         else:
                             edge.kwargs=params
                         graph.edges.append(edge)
+            
 
 
     def parseFile(self, filename):
@@ -293,3 +301,15 @@ class DotParser():
                 fi.write("dgraph {\n")
                 self.populate_file(graph, "->", fi)
                 fi.write("}")
+
+    def toJSON(self, filename, graph):
+        graph_dic = graph.toDICT()
+        with open(filename, 'w') as fp:
+            json.dump(graph_dic, fp, indent=4)
+
+    def fromJSON(self, filename):
+        graph = Graph("")
+        with open(filename, 'r') as fp:
+            graph_dic = json.load(fp)
+            graph.fromDICT(graph_dic)
+        return graph

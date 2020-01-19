@@ -59,3 +59,9 @@ Cluster paramters syntax is still incompatible with Standard GraphViz syntax:
 Better compatibility with Graphviz.
 Clusters can now have graphviz style parameters
 Semicolumn at the end of each line is no more needed
+
+### V 0.0.21 :
+Fixed subgraph loading code
+
+### V 0.0.24 :
+Added save and load json format graphs

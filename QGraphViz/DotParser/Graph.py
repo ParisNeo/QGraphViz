@@ -8,6 +8,7 @@ Grapph object
 """
 import enum
 from QGraphViz.DotParser.Node import Node
+from QGraphViz.DotParser.Edge import Edge
 
 class GraphType(enum.Enum):
     SimpleGraph=0
@@ -47,3 +48,47 @@ class Graph(Node):
         else:
             return None
 
+    def findNode(self, node_name):
+        for node in self.nodes:
+            if(node.name==node_name):
+                return node
+            if(type(node)==Graph):
+                nd = node.findNode(node_name)
+                if(nd!=None):
+                    return nd
+        return None
+
+    def toDICT(self):
+        graph_dic = {}
+        graph_dic["name"]=self.name
+        graph_dic["graph_type"]=self.graph_type.value
+        graph_dic["kwargs"]=self.kwargs
+        graph_dic["nodes"]=[]
+        graph_dic["edges"]=[]
+
+        for node in self.nodes:
+            graph_dic["nodes"].append(node.toDICT())
+        for edge in self.edges:
+            graph_dic["edges"].append(edge.toDICT())
+
+        return graph_dic
+
+    def fromDICT(self, graph_dic):
+        self.name = graph_dic["name"]
+        self.graph_type = GraphType(graph_dic["graph_type"])
+        self.kwargs = graph_dic["kwargs"]
+        self.nodes=[]
+        for node in graph_dic["nodes"]:
+            if("graph_type" in node.keys()):
+                self.nodes.append(Graph(node["name"], self, **node["kwargs"]).fromDICT(node))
+            else:
+                self.nodes.append(Node(node["name"], self, **node["kwargs"]))
+
+        for edge in graph_dic["edges"]:
+            source = self.findNode(edge["source"])
+            dest = self.findNode(edge["dest"])
+            ed = Edge(source, dest)
+            ed.kwargs = edge["kwargs"]
+            self.edges.append(ed)
+            
+        return self

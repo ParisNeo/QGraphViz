@@ -38,15 +38,16 @@ if __name__ == "__main__":
     def edge_invoked(node):
         print("Edge double clicked")
     # Create QGraphViz widget
+    show_subgraphs=True
     qgv = QGraphViz(
-        show_subgraphs=False,
+        show_subgraphs=show_subgraphs,
         node_selected_callback=node_selected,
         edge_selected_callback=edge_selected,
         node_invoked_callback=node_invoked,
         edge_invoked_callback=edge_invoked,
         )
     # Create A new Graph using Dot layout engine
-    qgv.new(Dot(Graph("Main_Graph")))
+    qgv.new(Dot(Graph("Main_Graph"),show_subgraphs=show_subgraphs))
     # Define sone graph
     n1 = qgv.addNode(qgv.engine.graph, "Node1", label="N1")
     n2 = qgv.addNode(qgv.engine.graph, "Node2", label="N2")
@@ -56,6 +57,8 @@ if __name__ == "__main__":
     n6 = qgv.addNode(qgv.engine.graph, "Node6", label="N6")
 
     sub = qgv.addSubgraph(qgv.engine.graph, "subgraph", qgv.engine.graph.graph_type, label="Subgraph")
+    n7 = qgv.addNode(sub, "Node7", label="N7")
+    n8 = qgv.addNode(sub, "Node8", label="N8")
 
     qgv.addEdge(n1, n2, {})
     qgv.addEdge(n3, n2, {})
@@ -83,19 +86,29 @@ if __name__ == "__main__":
     # Add few buttons to the panel
     def manipulate():
         qgv.manipulation_mode=QGraphVizManipulationMode.Nodes_Move_Mode
+
     def save():
-        fname = QFileDialog.getSaveFileName(qgv, "Save", "", "*.gv")
+        fname = QFileDialog.getSaveFileName(qgv, "Save", "", "*.json")
         if(fname[0]!=""):
-            qgv.save(fname[0])
+            qgv.saveAsJson(fname[0])
+
+        #fname = QFileDialog.getSaveFileName(qgv, "Save", "", "*.gv")
+        #if(fname[0]!=""):
+        #    qgv.save(fname[0])
         
     def new():
         qgv.engine.graph = Graph("MainGraph")
         qgv.build()
         qgv.repaint()
+
     def load():
-        fname = QFileDialog.getOpenFileName(qgv, "Open", "", "*.gv")
+        fname = QFileDialog.getOpenFileName(qgv, "Open", "", "*.json")
         if(fname[0]!=""):
-            qgv.load_file(fname[0])
+            qgv.loadAJson(fname[0])
+
+        #fname = QFileDialog.getOpenFileName(qgv, "Open", "", "*.gv")
+        #if(fname[0]!=""):
+        #    qgv.load_file(fname[0])
 
     def add_node():
         dlg = QDialog()

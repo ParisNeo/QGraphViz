@@ -28,3 +28,9 @@ class Node():
             return [self.pos[0]+self.parent_graph.pos[0], self.pos[1]+self.parent_graph.pos[1]]
         else:
             return self.pos
+
+    def toDICT(self):
+        node_dic = {}
+        node_dic["name"]=self.name
+        node_dic["kwargs"]=self.kwargs
+        return node_dic
