@@ -65,3 +65,7 @@ Fixed subgraph loading code
 
 ### V 0.0.24 :
 Added save and load json format graphs
+
+### V 0.0.25 :
+Added the possibility to add multiple edges between the same nodes two nodes
+The cycles are still forbidden as they break the Dot engine

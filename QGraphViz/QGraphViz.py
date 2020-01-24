@@ -7,7 +7,7 @@ Description:
 Main Class to QGraphViz tool
 """
 from PyQt5.QtWidgets import QApplication, QWidget
-from PyQt5.QtGui import QPainter, QPen, QBrush, QColor
+from PyQt5.QtGui import QPainter, QPen, QBrush, QColor, QPainterPath
 from PyQt5.QtCore import Qt 
 import sys
 import enum
@@ -105,7 +105,7 @@ class QGraphViz(QWidget):
                     subgraph = node
                     self.paintSubgraph(subgraph, painter, pen, brush)
 
-        for edge in graph.edges:
+        for i,edge in enumerate(graph.edges):
             if("color" in edge.kwargs.keys()):
                 pen.setColor(QColor(edge.kwargs["color"]))
             else:
@@ -127,10 +127,26 @@ class QGraphViz(QWidget):
                 gspos = edge.dest.parent_graph.global_pos
             else:
                 gdpos = edge.dest.global_pos
+
+            nb_next=0
+            for j in range(i, len(graph.edges)):
+                if(graph.edges[j].source==edge.source and graph.edges[j].dest==edge.dest):
+                    nb_next+=1
+
+            offset=[0,0]
+            if(nb_next%2==1):
+                offset[0]=20*(nb_next/2)
+            else:
+                offset[0]=-20*(nb_next/2)
+            path = QPainterPath()
+            path.moveTo(gspos[0],gspos[1])
+            path.cubicTo(gspos[0],gspos[1],offset[0]+(gspos[0]+gdpos[0])/2,(gspos[1]+gdpos[1])/2,gdpos[0],gdpos[1])
+            painter.strokePath(path, pen)
+            """
             painter.drawLine(gspos[0],gspos[1],
             gdpos[0],
             gdpos[1])
-
+            """
          # TODO : add more painting parameters
         for node in graph.nodes:
             if type(node)!=Graph:
