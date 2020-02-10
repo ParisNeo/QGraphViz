@@ -35,6 +35,7 @@ class QGraphViz(QWidget):
                     engine=None, 
                     show_subgraphs = True,
                     manipulation_mode=QGraphVizManipulationMode.Nodes_Move_Mode,
+                    new_edge_beingAdded_callback=None, # A callback called when a new connection is being added (should return True or False to accept or not the edge, as well as return the edge parameters)
                     new_edge_created_callback=None, # A callbakc called when a new connection is created between two nodes using the GUI
                     node_selected_callback=None, # A callback called when a node is clicked
                     edge_selected_callback=None, # A callback called when an edge is clicked
@@ -54,6 +55,7 @@ class QGraphViz(QWidget):
         self.min_cursor_edge_dist=3
         self.show_subgraphs=show_subgraphs
 
+        self.new_edge_beingAdded_callback = new_edge_beingAdded_callback
         self.new_edge_created_callback = new_edge_created_callback
         self.node_selected_callback = node_selected_callback
         self.edge_selected_callback = edge_selected_callback
@@ -236,6 +238,8 @@ class QGraphViz(QWidget):
             source.parent_graph.edges.append(edge)
         else:
             self.engine.graph.edges.append(edge)
+        
+        return edge
 
     def addSubgraph(self, parent_graph, subgraph_name, subgraph_type= GraphType.SimpleGraph, **kwargs):
         subgraph = Graph(subgraph_name,subgraph_type, parent_graph, **kwargs)
@@ -314,16 +318,30 @@ class QGraphViz(QWidget):
         return None
 
     def findEdge(self, graph, x, y):
-        for e in graph.edges:
+        for i,e in enumerate(graph.edges):
+            nb_next=0
+            for j in range(i, len(graph.edges)):
+                if(graph.edges[j].source==e.source and graph.edges[j].dest==e.dest):
+                    nb_next+=1
+
+            offset=[0,0]
+            if(nb_next%2==1):
+                offset[0]=20*(nb_next/2)
+            else:
+                offset[0]=-20*(nb_next/2)
+
             sx=e.source.pos[0] if e.source.pos[0]< e.dest.pos[0] else e.dest.pos[0]
             sy=e.source.pos[1] if e.source.pos[1]< e.dest.pos[1] else e.dest.pos[1]
 
             ex=e.source.pos[0] if e.source.pos[0]> e.dest.pos[0] else e.dest.pos[0]
             ey=e.source.pos[1] if e.source.pos[1]> e.dest.pos[1] else e.dest.pos[1]
 
+            sx += +offset[0]
+            ex += +offset[0]
+
             if(x>sx-self.min_cursor_edge_dist and x<ex+self.min_cursor_edge_dist and
                y>sy-self.min_cursor_edge_dist and y<ey+self.min_cursor_edge_dist):
-                x2 = x-sx 
+                x2 = x-sx
                 y2 = y-sy 
                 dx = (ex-sx)
                 dy = (ey-sy)
@@ -433,12 +451,15 @@ class QGraphViz(QWidget):
                 d = n if n is not None else s
                 if(d!=self.selected_Node and d is not None):
                     add_the_edge=True
-                    if(self.new_edge_created_callback is not None):
-                        add_the_edge, kwargs=self.new_edge_created_callback(self.selected_Node, d)
+                    if(self.new_edge_beingAdded_callback is not None):
+                        add_the_edge, kwargs=self.new_edge_beingAdded_callback(self.selected_Node, d)
                     else:
                         kwargs={}
                     if add_the_edge:
-                        self.addEdge(self.selected_Node, d, kwargs)
+                        edge = self.addEdge(self.selected_Node, d, kwargs)
+                        if(add_the_edge):
+                            if(self.new_edge_created_callback is not None):
+                                self.new_edge_created_callback(edge)
                         self.build()
                 self.selected_Node=None
         # Removing node

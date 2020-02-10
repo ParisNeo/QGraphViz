@@ -69,3 +69,11 @@ Added save and load json format graphs
 ### V 0.0.25 :
 Added the possibility to add multiple edges between the same nodes two nodes
 The cycles are still forbidden as they break the Dot engine
+
+### V 0.0.26 :
+Edge selection when more than a single edge is used between two nodes
+
+### V 0.0.27 :
+Added edge event. Now adding edge results in two events:
+ - The first event is new_edge_beingAdded_callback which asks the application to validate the edge adding. 
+ - The second event is new_edge_created_callback whicj informs the application that the edge is created
