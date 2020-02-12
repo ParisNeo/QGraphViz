@@ -37,6 +37,10 @@ if __name__ == "__main__":
         print("Node double clicked")
     def edge_invoked(node):
         print("Edge double clicked")
+    def node_removed(node):
+        print("Node removed")
+    def edge_removed(node):
+        print("Edge removed")
     # Create QGraphViz widget
     show_subgraphs=True
     qgv = QGraphViz(
@@ -45,6 +49,8 @@ if __name__ == "__main__":
         edge_selected_callback=edge_selected,
         node_invoked_callback=node_invoked,
         edge_invoked_callback=edge_invoked,
+        node_removed_callback=node_removed,
+        edge_removed_callback=edge_removed
         )
     # Create A new Graph using Dot layout engine
     qgv.new(Dot(Graph("Main_Graph"),show_subgraphs=show_subgraphs))

@@ -41,6 +41,8 @@ class QGraphViz(QWidget):
                     edge_selected_callback=None, # A callback called when an edge is clicked
                     node_invoked_callback=None, # A callback called when a node is double clicked
                     edge_invoked_callback=None, # A callback called when an edge is double clicked
+                    node_removed_callback=None, # A callback called when a node is removed
+                    edge_removed_callback=None # A callback called when an edge is removed
                 ):
         QWidget.__init__(self,parent)
         self.parser = DotParser()
@@ -61,6 +63,8 @@ class QGraphViz(QWidget):
         self.edge_selected_callback = edge_selected_callback
         self.node_invoked_callback = node_invoked_callback
         self.edge_invoked_callback = edge_invoked_callback
+        self.node_removed_callback=node_removed_callback
+        self.edge_removed_callback=edge_removed_callback # A callback called when an edge is removed
 
     def build(self):
         self.engine.build()
@@ -253,6 +257,8 @@ class QGraphViz(QWidget):
         if(node in graph.nodes):
             idx = graph.nodes.index(node)
             node = graph.nodes[idx]
+            if(self.node_removed_callback is not None):
+                self.node_removed_callback(node)
             for edge in node.in_edges:
                 del edge.source.out_edges[edge.source.out_edges.index(edge)]
                 if edge.source.parent_graph == edge.dest.parent_graph:
@@ -274,6 +280,8 @@ class QGraphViz(QWidget):
         if(subgraph in graph.subgraphs):
             idx = graph.subgraphs.index(subgraph)
             subgraph = graph.subgraphs[idx]
+            if(self.node_removed_callback is not None):
+                self.node_removed_callback(subgraph)
             del graph.subgraphs[idx]
             self.repaint()
 
@@ -281,6 +289,8 @@ class QGraphViz(QWidget):
         if(edge in self.engine.graph.edges):
             source = edge.source
             dest = edge.dest
+            if(self.edge_removed_callback is not None):
+                self.edge_removed_callback(edge)
 
             idx = source.out_edges.index(edge)
             del source.out_edges[idx]
