@@ -178,9 +178,9 @@ class QGraphViz(QWidget):
                                     gpos[1]-node.size[1]/2,
                                     node.size[0], node.size[1])
                     
-                    # Image as a node, this implementation checks to see if a directory
-                    # path was provided in the attribute shape
-                    if(os.path.exists(node.kwargs["shape"])): 
+                    # Image as a node, this implementation checks to see if a 
+                    # path file was provided in the attribute shape
+                    if(os.path.isfile(node.kwargs["shape"])): 
                         img_path = node.kwargs["shape"]
                         painter.drawImage(
                             QRect(
