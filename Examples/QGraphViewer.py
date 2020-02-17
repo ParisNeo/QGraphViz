@@ -66,12 +66,18 @@ if __name__ == "__main__":
     n7 = qgv.addNode(sub, "Node7", label="N7")
     n8 = qgv.addNode(sub, "Node8", label="N8")
 
+    # Adding nodes with an image as its shape
+    icon_path = os.path.dirname(os.path.abspath(__file__)) + r"\icon\dbicon.png"
+    n9 = qgv.addNode(qgv.engine.graph, "Node9", label="N9", shape=icon_path)
+
     qgv.addEdge(n1, n2, {})
     qgv.addEdge(n3, n2, {})
     qgv.addEdge(n2, n4, {"width":2})
     qgv.addEdge(n4, n5, {"width":4})
     qgv.addEdge(n4, n6, {"width":5,"color":"red"})
     qgv.addEdge(n3, n6, {"width":2})
+    qgv.addEdge(n6, n9, {"width":5,"color":"red"})
+
 
     # Build the graph (the layout engine organizes where the nodes and connections are)
     qgv.build()
@@ -134,6 +140,7 @@ if __name__ == "__main__":
         leNodeName = QLineEdit()
         leNodeLabel = QLineEdit()
         cbxNodeType = QComboBox()
+        leImagePath = QLineEdit()
 
         pbOK = QPushButton()
         pbCancel = QPushButton()
@@ -148,12 +155,17 @@ if __name__ == "__main__":
         l.setWidget(1, QFormLayout.FieldRole, leNodeLabel)
         l.setWidget(2, QFormLayout.LabelRole, QLabel("Node Type"))
         l.setWidget(2, QFormLayout.FieldRole, cbxNodeType)
+        l.setWidget(3, QFormLayout.LabelRole, QLabel("Node Image"))
+        l.setWidget(3, QFormLayout.FieldRole, leImagePath)
 
         def ok():
             dlg.OK=True
             dlg.node_name = leNodeName.text()
             dlg.node_label = leNodeLabel.text()
-            dlg.node_type = cbxNodeType.currentText()
+            if(leImagePath.text()): 
+                dlg.node_type = leImagePath.text()
+            else: 
+                dlg.node_type = cbxNodeType.currentText()
             dlg.close()
 
         def cancel():
