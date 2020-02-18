@@ -179,7 +179,7 @@ class QGraphViz(QWidget):
                                     node.size[0], node.size[1])
                     
                     # Image as a node, this implementation checks to see if a 
-                    # path file was provided in the attribute shape
+                    # file path was provided in the shape parameter
                     if(os.path.isfile(node.kwargs["shape"])): 
                         img_path = node.kwargs["shape"]
                         painter.drawImage(
