@@ -7,8 +7,9 @@ Description:
 Main Class to QGraphViz tool
 """
 from PyQt5.QtWidgets import QApplication, QWidget
-from PyQt5.QtGui import QPainter, QPen, QBrush, QColor, QPainterPath
-from PyQt5.QtCore import Qt 
+from PyQt5.QtGui import QPainter, QPen, QBrush, QColor, QPainterPath, QImage
+from PyQt5.QtCore import Qt, QRect
+import os
 import sys
 import enum
 import datetime
@@ -176,7 +177,18 @@ class QGraphViz(QWidget):
                                     gpos[0]-node.size[0]/2,
                                     gpos[1]-node.size[1]/2,
                                     node.size[0], node.size[1])
-
+                    
+                    # Image as a node, this implementation checks to see if a 
+                    # file path was provided in the shape parameter
+                    if(os.path.isfile(node.kwargs["shape"])): 
+                        img_path = node.kwargs["shape"]
+                        painter.drawImage(
+                            QRect(
+                                gpos[0]-node.size[0]/2,
+                                gpos[1]-node.size[1]/2,
+                                node.size[0],
+                                node.size[1]), 
+                            QImage(img_path))
                 else:
                     painter.drawEllipse(
                                 gpos[0]-node.size[0]/2,
