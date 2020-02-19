@@ -10,10 +10,12 @@ label=Subgraph
     Node7 [label=N7]
     Node8 [label=N8]
     }
+    Node9 [label=N9,shape=c:\Users\aloui\Documents\QGraphViz\Examples\icon\dbicon.png]
     Node1 -- Node2
     Node3 -- Node2
     Node2 -- Node4 [width=2]
     Node4 -- Node5 [width=4]
     Node4 -- Node6 [width=5,color=red]
     Node3 -- Node6 [width=2]
+    Node6 -- Node9 [width=5,color=red]
 }

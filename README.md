@@ -79,3 +79,8 @@ Added edge event. Now adding edge results in two events:
  - The second event is new_edge_created_callback whicj informs the application that the edge is created
 ### V 0.0.28 :
 Added node removed and edge removed events.
+### V 0.0.29 :
+Node shapes from images added by Ederrod and merged to the master branch.
+#### Warning !
+If you are aiming to export a .gv file of your graph, don't use images as shapes because this is not supported by real graphviz tool. 
+You can use it safely if you save your graph in our json format.

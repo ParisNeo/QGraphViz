@@ -62,7 +62,7 @@ if __name__ == "__main__":
     n5 = qgv.addNode(qgv.engine.graph, "Node5", label="N5")
     n6 = qgv.addNode(qgv.engine.graph, "Node6", label="N6")
 
-    sub = qgv.addSubgraph(qgv.engine.graph, "subgraph", qgv.engine.graph.graph_type, label="Subgraph")
+    sub = qgv.addSubgraph(qgv.engine.graph, "sub graph", qgv.engine.graph.graph_type, label="Subgraph")
     n7 = qgv.addNode(sub, "Node7", label="N7")
     n8 = qgv.addNode(sub, "Node8", label="N8")
 
