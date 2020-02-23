@@ -41,6 +41,7 @@ if __name__ == "__main__":
         print("Node removed")
     def edge_removed(node):
         print("Edge removed")
+        
     # Create QGraphViz widget
     show_subgraphs=True
     qgv = QGraphViz(
@@ -52,6 +53,7 @@ if __name__ == "__main__":
         node_removed_callback=node_removed,
         edge_removed_callback=edge_removed
         )
+    qgv.setStyleSheet("background-color:white;")
     # Create A new Graph using Dot layout engine
     qgv.new(Dot(Graph("Main_Graph"),show_subgraphs=show_subgraphs))
     # Define sone graph

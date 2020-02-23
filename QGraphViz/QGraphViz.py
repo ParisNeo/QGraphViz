@@ -66,7 +66,8 @@ class QGraphViz(QWidget):
         self.edge_invoked_callback = edge_invoked_callback
         self.node_removed_callback=node_removed_callback
         self.edge_removed_callback=edge_removed_callback # A callback called when an edge is removed
-
+        self.setAutoFillBackground(True)
+        self.setAttribute(Qt.WA_StyledBackground, True)
     def build(self):
         self.engine.build()
         """

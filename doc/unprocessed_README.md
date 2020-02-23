@@ -1,5 +1,5 @@
 # QGraphViz
-
+!define(cite_)([!1](https://github.com/!1))
 A PyQT based GraphViz builder/renderer (100% opensource)
 
 ## Introduction
@@ -67,6 +67,6 @@ You can use it safely if you save your graph in our json format.
 
 Here I'll be siting the contributions of others than myself and show them gratitude for help :
 
-- Many thanks to [Ederrod](https://github.com/Ederrod) for adding icon shaped nodes.
+- Many thanks to !cite_(Ederrod) for adding icon shaped nodes.
 
 If any one has ideas to enhance this tool, you are welcome to contribute.
