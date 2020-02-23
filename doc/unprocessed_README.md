@@ -49,14 +49,13 @@ pip install QGraphViz
 11. Subgraphs are not supported yet
 12. Only the dot layout is implemented
 
-
 ## Example code
 
-You can find an example code for manipulating graphs in [examples/QGraphViewer.py](examples/QGraphViewer.py).
+You can find an example code for manipulating graphs in [examples/QGraphViewer.py](https://github.com/ParisNeo/QGraphViz/blob/master/Examples/QGraphViewer.py).
 
 ## Change log
 
-To view different changes from release to the other please view our [changelog](changelog.md)
+To view different changes from release to the other please view our [changelog](https://github.com/ParisNeo/QGraphViz/blob/master/ChangeLog.md).
 
 ## Warning
 
