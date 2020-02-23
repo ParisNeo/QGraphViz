@@ -7,6 +7,7 @@ A PyQT based GraphViz builder/renderer (100% opensource)
 I was searching for a handy tool to code graphs using python then visualize them within my software. I found about graphviz which is a great tool to build graphs.
 
 The problem is that you need to install the graphviz software in order to compile your file and render it.
+
 There is a graphviz package on PYPI that allows creating dot code that can then be processed by graphviz, but in practice, you need to install graphviz and somehow add it to your path in order to execute the render command.
 
 PyGraphviz is another package that can be used. But as you can read in their documentation, you still need to install Graphviz.

@@ -103,6 +103,9 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-#Graphviz files
-*.gv
+#Graphviz and qgraphviz files
+test.gv
+test.json
+
+# pp markdown preprocessor
 pp.exe
