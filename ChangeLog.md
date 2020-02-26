@@ -1,5 +1,13 @@
 # ChangeLog
 
+## V 0.0.37
+
+Bugfix. Added ways to discard selection and hilighting when focus is lost
+
+## V 0.0.33
+
+Added mouse out event handler to reset selection when mouse leaves the qgraphviz widget
+
 ## V 0.0.32
 
 Added node and edge hilighting options

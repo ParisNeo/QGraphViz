@@ -429,6 +429,7 @@ class QGraphViz(QWidget):
             if(self.isEdgeHovered(graph, i, e, x, y)):
                 return e,i
         return None,0
+
     def load_file(self, filename):
         self.engine.graph = self.parser.parseFile(filename)
         self.build()
@@ -460,6 +461,7 @@ class QGraphViz(QWidget):
                     self.edge_invoked_callback(e)
 
         QWidget.mouseDoubleClickEvent(self, event)
+        self.leaveEvent()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -476,6 +478,26 @@ class QGraphViz(QWidget):
 
         QWidget.mousePressEvent(self, event)
 
+    def leaveEvent(self, event=None):
+        """
+        Used to reset some parameters when the mouse leaves the QWidget
+        """
+        self.selected_Node=None
+
+        self.mouse_down=False
+
+        if(self.hovered_Node is not None):
+            self.hovered_Node.kwargs["width"] = self.hovered_Node_Back_width
+            self.hovered_Node = None
+        
+        if(self.hovered_Edge is not None):
+            self.hovered_Edge.kwargs["width"] = self.hovered_Edge_Back_width
+            self.hovered_Edge = None
+
+        self.update()
+        if(event!=None):
+            event.accept()
+        
 
     def mouseMoveEvent(self, event):
         if self.selected_Node is not None and self.mouse_down:
@@ -520,7 +542,7 @@ class QGraphViz(QWidget):
                         self.hovered_Edge.kwargs["width"] = self.hovered_Edge_Back_width
                         self.hovered_Edge = None
                         self.update()
-                        
+
         QWidget.mouseMoveEvent(self, event)
 
     def mouseReleaseEvent(self, event):
