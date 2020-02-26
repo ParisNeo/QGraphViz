@@ -1,5 +1,11 @@
 # ChangeLog
 
+## V 0.0.38
+
+Bugfix: Add edge bug due to loss of selected node before finishing the operation  if the event edge being added makes the QGraphViz widget loose focuse. This bug was introduced by Version 0.0.37
+
+Added Node and subgraph color filling with possibility to use basic linear gradient
+
 ## V 0.0.37
 
 Bugfix. Added ways to discard selection and hilighting when focus is lost

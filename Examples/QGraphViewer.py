@@ -61,14 +61,14 @@ if __name__ == "__main__":
     # Create A new Graph using Dot layout engine
     qgv.new(Dot(Graph("Main_Graph"), show_subgraphs=show_subgraphs))
     # Define sone graph
-    n1 = qgv.addNode(qgv.engine.graph, "Node1", label="N1")
-    n2 = qgv.addNode(qgv.engine.graph, "Node2", label="N2")
+    n1 = qgv.addNode(qgv.engine.graph, "Node1", label="N1", fillcolor="red")
+    n2 = qgv.addNode(qgv.engine.graph, "Node2", label="N2", fillcolor="blue:white:red")
     n3 = qgv.addNode(qgv.engine.graph, "Node3", label="N3")
     n4 = qgv.addNode(qgv.engine.graph, "Node4", label="N4")
     n5 = qgv.addNode(qgv.engine.graph, "Node5", label="N5")
     n6 = qgv.addNode(qgv.engine.graph, "Node6", label="N6")
 
-    sub = qgv.addSubgraph(qgv.engine.graph, "sub graph", qgv.engine.graph.graph_type, label="Subgraph")
+    sub = qgv.addSubgraph(qgv.engine.graph, "sub graph", qgv.engine.graph.graph_type, label="Subgraph", fillcolor="blue:white:red")
     n7 = qgv.addNode(sub, "Node7", label="N7")
     n8 = qgv.addNode(sub, "Node8", label="N8")
 

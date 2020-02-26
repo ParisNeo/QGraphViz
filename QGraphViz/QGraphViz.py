@@ -7,7 +7,7 @@ Description:
 Main Class to QGraphViz tool
 """
 from PyQt5.QtWidgets import QApplication, QWidget
-from PyQt5.QtGui import QPainter, QPen, QBrush, QColor, QPainterPath, QImage
+from PyQt5.QtGui import QPainter, QPen, QBrush, QColor, QPainterPath, QImage, QLinearGradient
 from PyQt5.QtCore import Qt, QRect
 import os
 import sys
@@ -119,6 +119,27 @@ class QGraphViz(QWidget):
         else:
             pen.setColor(QColor("black"))
 
+        if("fillcolor" in subgraph.kwargs.keys()):
+            if(":" in subgraph.kwargs["fillcolor"]):
+                gradient=QLinearGradient(subgraph.pos[0]-subgraph.size[0]/2, subgraph.pos[1], subgraph.pos[0]+subgraph.size[0]/2, subgraph.pos[1])
+                c=subgraph.kwargs["fillcolor"].split(":")
+                for i, col in enumerate(c):
+                    stop = i/(len(c)-1)
+                    gradient.setColorAt(stop, QColor(col))
+
+                brush = QBrush(gradient)
+            else:
+                brush=QBrush(QColor(subgraph.kwargs["fillcolor"]))
+        else:
+            brush=QBrush(QColor("white"))
+
+
+
+        if("width" in subgraph.kwargs.keys()):
+            pen.setWidth(int(subgraph.kwargs["width"]))
+        else:
+            pen.setWidth(1)
+
         painter.setPen(pen)
         painter.setBrush(brush)
         gpos = subgraph.global_pos
@@ -195,6 +216,20 @@ class QGraphViz(QWidget):
                     pen.setColor(QColor(node.kwargs["color"]))
                 else:
                     pen.setColor(QColor("black"))
+
+                if("fillcolor" in node.kwargs.keys()):
+                    if(":" in node.kwargs["fillcolor"]):
+                        gradient=QLinearGradient(node.pos[0]-node.size[0]/2, node.pos[1], node.pos[0]+node.size[0]/2, node.pos[1])
+                        c=node.kwargs["fillcolor"].split(":")
+                        for i, col in enumerate(c):
+                            stop = i/(len(c)-1)
+                            gradient.setColorAt(stop, QColor(col))
+
+                        brush = QBrush(gradient)
+                    else:
+                        brush=QBrush(QColor(node.kwargs["fillcolor"]))
+                else:
+                    brush=QBrush(QColor("white"))
 
                 if("width" in node.kwargs.keys()):
                     pen.setWidth(int(node.kwargs["width"]))
@@ -558,33 +593,35 @@ class QGraphViz(QWidget):
         # Manipulating nodes
         if(self.manipulation_mode==QGraphVizManipulationMode.Nodes_Move_Mode):
             if self.selected_Node is not None and self.mouse_down:
+                selected_Node = self.selected_Node
                 s = self.findSubNode(self.engine.graph, x,y)
-                if(s is not None and s!=self.selected_Node):
-                    if(type(self.selected_Node)==Node):
-                        del self.selected_Node.parent_graph.nodes[self.selected_Node.parent_graph.nodes.index(self.selected_Node)]
-                        s.nodes.append(self.selected_Node)
-                        self.selected_Node.parent_graph = s
+                if(s is not None and s!=selected_Node):
+                    if(type(selected_Node)==Node):
+                        del selected_Node.parent_graph.nodes[selected_Node.parent_graph.nodes.index(selected_Node)]
+                        s.nodes.append(selected_Node)
+                        selected_Node.parent_graph = s
                         self.build()
                         self.repaint()
-                    if(type(self.selected_Node)==Graph):
-                        del self.selected_Node.parent_graph.nodes[self.selected_Node.parent_graph.nodes.index(self.selected_Node)]
-                        s.nodes.append(self.selected_Node)
-                        self.selected_Node.parent_graph = s
+                    if(type(selected_Node)==Graph):
+                        del selected_Node.parent_graph.nodes[selected_Node.parent_graph.nodes.index(selected_Node)]
+                        s.nodes.append(selected_Node)
+                        selected_Node.parent_graph = s
                         self.build()
                         self.repaint()
 
         # Connecting edges
         if(self.manipulation_mode==QGraphVizManipulationMode.Edges_Connect_Mode):
             if self.selected_Node is not None and self.mouse_down:
+                selected_Node = self.selected_Node
                 d = n if n is not None else s
-                if(d!=self.selected_Node and d is not None):
+                if(d!=selected_Node and d is not None):
                     add_the_edge=True
                     if(self.new_edge_beingAdded_callback is not None):
-                        add_the_edge, kwargs=self.new_edge_beingAdded_callback(self.selected_Node, d)
+                        add_the_edge, kwargs=self.new_edge_beingAdded_callback(selected_Node, d)
                     else:
                         kwargs={}
                     if add_the_edge:
-                        edge = self.addEdge(self.selected_Node, d, kwargs)
+                        edge = self.addEdge(selected_Node, d, kwargs)
                         if(add_the_edge):
                             if(self.new_edge_created_callback is not None):
                                 self.new_edge_created_callback(edge)
