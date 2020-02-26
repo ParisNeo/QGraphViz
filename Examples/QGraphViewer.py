@@ -46,16 +46,20 @@ if __name__ == "__main__":
     show_subgraphs=True
     qgv = QGraphViz(
         show_subgraphs=show_subgraphs,
+        
         node_selected_callback=node_selected,
         edge_selected_callback=edge_selected,
         node_invoked_callback=node_invoked,
         edge_invoked_callback=edge_invoked,
         node_removed_callback=node_removed,
-        edge_removed_callback=edge_removed
+        edge_removed_callback=edge_removed,
+
+        hilight_Nodes=True,
+        hilight_Edges=True
         )
     qgv.setStyleSheet("background-color:white;")
     # Create A new Graph using Dot layout engine
-    qgv.new(Dot(Graph("Main_Graph"),show_subgraphs=show_subgraphs))
+    qgv.new(Dot(Graph("Main_Graph"), show_subgraphs=show_subgraphs))
     # Define sone graph
     n1 = qgv.addNode(qgv.engine.graph, "Node1", label="N1")
     n2 = qgv.addNode(qgv.engine.graph, "Node2", label="N2")

@@ -27,8 +27,6 @@ class QGraphVizManipulationMode(enum.Enum):
 class QGraphViz(QWidget):
     """
     Main graphviz widget to draw and interact with graphs
-    :param parent: A QWidget parent of the QGraphViz widget
-    :param engine: The graph processing engine (exemple Dot engine)
     """
     def __init__(
                     self, 
@@ -36,6 +34,7 @@ class QGraphViz(QWidget):
                     engine=None, 
                     show_subgraphs = True,
                     manipulation_mode=QGraphVizManipulationMode.Nodes_Move_Mode,
+                    # Callbacks
                     new_edge_beingAdded_callback=None, # A callback called when a new connection is being added (should return True or False to accept or not the edge, as well as return the edge parameters)
                     new_edge_created_callback=None, # A callbakc called when a new connection is created between two nodes using the GUI
                     node_selected_callback=None, # A callback called when a node is clicked
@@ -43,21 +42,49 @@ class QGraphViz(QWidget):
                     node_invoked_callback=None, # A callback called when a node is double clicked
                     edge_invoked_callback=None, # A callback called when an edge is double clicked
                     node_removed_callback=None, # A callback called when a node is removed
-                    edge_removed_callback=None # A callback called when an edge is removed
+                    edge_removed_callback=None, # A callback called when an edge is removed
+
+                    # Custom options
+                    min_cursor_edge_dist=3,
+                    hilight_Nodes=False,
+                    hilight_Edges=False
                 ):
+        """
+        QGraphViz widget Constructor
+        :param parent: A QWidget parent of the QGraphViz widget
+        :param engine: The graph processing engine (exemple Dot engine)
+        :param show_subgraphs: Tells whether to show the content of subgraphs or not
+        :param manipulation_mode: Sets the current graph manipulations mode
+        :param new_edge_beingAdded_callback: A callback issued when a new edge is being added. This callback should return a boolean to accept or refuse adding the edge.
+        :param new_edge_created_callback: A callback issued when a new edge is added.
+        :param node_selected_callback: A callback issued when a node is selected.
+        :param edge_selected_callback: A callback issued when an edge is selected.
+        :param node_removed_callback: A callback issued when an node is removed.
+        :param edge_removed_callback: A callback issued when an edge is removed.
+        :param min_cursor_edge_dist: Minimal distance between sursor edge.
+        :param hilight_Nodes: If True, whenever mouse is hovered on a node, it is hilighted.
+        :param hilight_Edges: If True, whenever mouse is hovered on an edge, it is hilighted.
+        """
         QWidget.__init__(self,parent)
         self.parser = DotParser()
         self.engine=engine
+        
+        # Pfrepare lists
         self.qnodes=[]
         self.qedges=[]
+
         # Nodes manipulation
         self.manipulation_mode = manipulation_mode
         self.selected_Node = None  
+        self.hovered_Node = None
+        self.hovered_Edge = None
+        self.hovered_Edge_id = None
         self.current_pos = [0,0]
         self.mouse_down=False
-        self.min_cursor_edge_dist=3
+        self.min_cursor_edge_dist=min_cursor_edge_dist
         self.show_subgraphs=show_subgraphs
 
+        # Set callbacks
         self.new_edge_beingAdded_callback = new_edge_beingAdded_callback
         self.new_edge_created_callback = new_edge_created_callback
         self.node_selected_callback = node_selected_callback
@@ -65,9 +92,15 @@ class QGraphViz(QWidget):
         self.node_invoked_callback = node_invoked_callback
         self.edge_invoked_callback = edge_invoked_callback
         self.node_removed_callback=node_removed_callback
-        self.edge_removed_callback=edge_removed_callback # A callback called when an edge is removed
+        self.edge_removed_callback=edge_removed_callback
+
+        self.hilight_Nodes=hilight_Nodes
+        self.hilight_Edges=hilight_Edges
+
         self.setAutoFillBackground(True)
         self.setAttribute(Qt.WA_StyledBackground, True)
+        self.setMouseTracking(True)
+
     def build(self):
         self.engine.build()
         """
@@ -162,6 +195,12 @@ class QGraphViz(QWidget):
                     pen.setColor(QColor(node.kwargs["color"]))
                 else:
                     pen.setColor(QColor("black"))
+
+                if("width" in node.kwargs.keys()):
+                    pen.setWidth(int(node.kwargs["width"]))
+                else:
+                    pen.setWidth(1)
+
                 gpos = node.global_pos
 
                 painter.setPen(pen)
@@ -330,56 +369,66 @@ class QGraphViz(QWidget):
                 return node
         return None
 
+    def isNodeHovered(self, n, x, y):
+        gpos=n.global_pos
+        if(
+            gpos[0]-n.size[0]/2<x and gpos[0]+n.size[0]/2>x and
+            gpos[1]-n.size[1]/2<y and gpos[1]+n.size[1]/2>y
+        ):
+            return True
+        else:
+            return False
+
+    def isEdgeHovered(self, graph, i, e, x, y):
+        nb_next=0
+        for j in range(i, len(graph.edges)):
+            if(graph.edges[j].source==e.source and graph.edges[j].dest==e.dest):
+                nb_next+=1
+
+        offset=[0,0]
+        if(nb_next%2==1):
+            offset[0]=20*(nb_next/2)
+        else:
+            offset[0]=-20*(nb_next/2)
+
+        sx=e.source.pos[0] if e.source.pos[0]< e.dest.pos[0] else e.dest.pos[0]
+        sy=e.source.pos[1] if e.source.pos[1]< e.dest.pos[1] else e.dest.pos[1]
+
+        ex=e.source.pos[0] if e.source.pos[0]> e.dest.pos[0] else e.dest.pos[0]
+        ey=e.source.pos[1] if e.source.pos[1]> e.dest.pos[1] else e.dest.pos[1]
+
+        sx += +offset[0]
+        ex += +offset[0]
+
+        if(x>sx-self.min_cursor_edge_dist and x<ex+self.min_cursor_edge_dist and
+            y>sy-self.min_cursor_edge_dist and y<ey+self.min_cursor_edge_dist):
+            x2 = x-sx
+            y2 = y-sy 
+            dx = (ex-sx)
+            dy = (ey-sy)
+            if(dx == 0):
+                if(abs(x2)<self.min_cursor_edge_dist):
+                    return True
+            elif(dy == 0):
+                if(abs(y2)<self.min_cursor_edge_dist):
+                    return True
+            else:
+                a = -dy/dx
+                if(abs(a*x2+y2)/math.sqrt(a**2)<self.min_cursor_edge_dist):
+                    return True
+        return False
+                    
     def findNode(self, graph, x, y):
         for n in graph.nodes:
-            gpos=n.global_pos
-            if(
-                gpos[0]-n.size[0]/2<x and gpos[0]+n.size[0]/2>x and
-                gpos[1]-n.size[1]/2<y and gpos[1]+n.size[1]/2>y
-            ):
+            if(self.isNodeHovered(n, x, y)):
                 return n
         return None
 
     def findEdge(self, graph, x, y):
         for i,e in enumerate(graph.edges):
-            nb_next=0
-            for j in range(i, len(graph.edges)):
-                if(graph.edges[j].source==e.source and graph.edges[j].dest==e.dest):
-                    nb_next+=1
-
-            offset=[0,0]
-            if(nb_next%2==1):
-                offset[0]=20*(nb_next/2)
-            else:
-                offset[0]=-20*(nb_next/2)
-
-            sx=e.source.pos[0] if e.source.pos[0]< e.dest.pos[0] else e.dest.pos[0]
-            sy=e.source.pos[1] if e.source.pos[1]< e.dest.pos[1] else e.dest.pos[1]
-
-            ex=e.source.pos[0] if e.source.pos[0]> e.dest.pos[0] else e.dest.pos[0]
-            ey=e.source.pos[1] if e.source.pos[1]> e.dest.pos[1] else e.dest.pos[1]
-
-            sx += +offset[0]
-            ex += +offset[0]
-
-            if(x>sx-self.min_cursor_edge_dist and x<ex+self.min_cursor_edge_dist and
-               y>sy-self.min_cursor_edge_dist and y<ey+self.min_cursor_edge_dist):
-                x2 = x-sx
-                y2 = y-sy 
-                dx = (ex-sx)
-                dy = (ey-sy)
-                if(dx == 0):
-                    if(abs(x2)<self.min_cursor_edge_dist):
-                        return e
-                elif(dy == 0):
-                    if(abs(y2)<self.min_cursor_edge_dist):
-                        return e
-                else:
-                    a = -dy/dx
-                    if(abs(a*x2+y2)/math.sqrt(a**2)<self.min_cursor_edge_dist):
-                        return e
-
-        return None
+            if(self.isEdgeHovered(graph, i, e, x, y)):
+                return e,i
+        return None,0
     def load_file(self, filename):
         self.engine.graph = self.parser.parseFile(filename)
         self.build()
@@ -405,7 +454,7 @@ class QGraphViz(QWidget):
             if(self.node_invoked_callback is not None):
                 self.node_invoked_callback(n)
         else:
-            e = self.findEdge(self.engine.graph, x, y)
+            e,_ = self.findEdge(self.engine.graph, x, y)
             if e is not None:
                 if(self.edge_invoked_callback is not None):
                     self.edge_invoked_callback(e)
@@ -438,6 +487,40 @@ class QGraphViz(QWidget):
 
             self.current_pos = [x,y]
             self.repaint()
+        else:
+            x = event.x()
+            y = event.y()
+            if(self.hilight_Nodes):
+                if(self.hovered_Node is None):
+                    self.hovered_Node = self.findNode(self.engine.graph, x, y)
+                    if(self.hovered_Node is not None):
+                        if "width" in list(self.hovered_Node.kwargs.keys()):
+                            self.hovered_Node_Back_width=self.hovered_Node.kwargs["width"]
+                        else:
+                            self.hovered_Node_Back_width=1
+                        self.hovered_Node.kwargs["width"] = self.hovered_Node_Back_width+3
+                        self.update()
+                else:
+                    if not(self.isNodeHovered(self.hovered_Node, x, y)):
+                        self.hovered_Node.kwargs["width"] = self.hovered_Node_Back_width
+                        self.hovered_Node = None
+                        self.update()
+            if(self.hilight_Edges):
+                if(self.hovered_Edge is None):
+                    self.hovered_Edge, self.hovered_Edge_id = self.findEdge(self.engine.graph, x, y)
+                    if(self.hovered_Edge is not None):
+                        if "width" in list(self.hovered_Edge.kwargs.keys()):
+                            self.hovered_Edge_Back_width=self.hovered_Edge.kwargs["width"]
+                        else:
+                            self.hovered_Edge_Back_width=1
+                        self.hovered_Edge.kwargs["width"] = self.hovered_Edge_Back_width+3
+                        self.update()
+                else:
+                    if not(self.isEdgeHovered(self.engine.graph, self.hovered_Edge_id, self.hovered_Edge, x, y)):
+                        self.hovered_Edge.kwargs["width"] = self.hovered_Edge_Back_width
+                        self.hovered_Edge = None
+                        self.update()
+                        
         QWidget.mouseMoveEvent(self, event)
 
     def mouseReleaseEvent(self, event):
@@ -447,7 +530,7 @@ class QGraphViz(QWidget):
         if n is None:
             s = self.findSubNode(self.engine.graph, x,y)     
         if n is None:
-            e = self.findEdge(self.engine.graph, x,y)        
+            e, _ = self.findEdge(self.engine.graph, x,y)        
         else:
             e = None
         # Manipulating nodes
