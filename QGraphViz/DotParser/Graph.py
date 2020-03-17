@@ -80,9 +80,14 @@ class Graph(Node):
         self.nodes=[]
         for node in graph_dic["nodes"]:
             if("graph_type" in node.keys()):
-                self.nodes.append(Graph(node["name"], self, **node["kwargs"]).fromDICT(node))
+                n = Graph(node["name"], self, **node["kwargs"]).fromDICT(node)
+                self.nodes.append(n)
             else:
-                self.nodes.append(Node(node["name"], self, **node["kwargs"]))
+                n = Node(node["name"], self, **node["kwargs"])
+                self.nodes.append(n)
+            if "pos" in node["kwargs"]:
+                n.pos = node["kwargs"]["pos"]
+                n.size = node["kwargs"]["size"]
 
         for edge in graph_dic["edges"]:
             source = self.findNode(edge["source"])

@@ -1,5 +1,9 @@
 # ChangeLog
 
+## V 0.0.39
+
+Feature: Added the position to freeze the graph. This can be done either by activating autofreeze, or by calling freeze method of QGraphViz.
+
 ## V 0.0.38
 
 Bugfix: Add edge bug due to loss of selected node before finishing the operation  if the event edge being added makes the QGraphViz widget loose focuse. This bug was introduced by Version 0.0.37

@@ -32,6 +32,7 @@ class QGraphViz(QWidget):
                     self, 
                     parent=None, 
                     engine=None, 
+                    auto_freeze=False,
                     show_subgraphs = True,
                     manipulation_mode=QGraphVizManipulationMode.Nodes_Move_Mode,
                     # Callbacks
@@ -68,6 +69,9 @@ class QGraphViz(QWidget):
         QWidget.__init__(self,parent)
         self.parser = DotParser()
         self.engine=engine
+
+        # Set autofreeze status
+        self.auto_freeze = auto_freeze
         
         # Pfrepare lists
         self.qnodes=[]
@@ -103,16 +107,27 @@ class QGraphViz(QWidget):
 
     def build(self):
         self.engine.build()
+        
+    def freeze(self):
+        """
+        freezes the graph and saves the current nodes positions
+        to the node parameters. When loading from JSON, the previous
+        position will be reloaded
         """
         for node in self.engine.graph.nodes:
-            qnode = QNode(node, self)
-            qnode.setParent(self)
-            self.qnodes.append(qnode)
-        for edge in self.engine.graph.edges:
-            qedge = QEdge(edge, self)
-            qedge.setParent(self)
-            self.qedges.append(qedge)
+            node.kwargs["pos"]=node.pos
+            node.kwargs["size"]=node.size
+
+    def unfreeze(self):
         """
+        This removes the effect of the freeze function
+        If called, the nodes position can be recomputed in the future
+        """
+        for node in self.engine.graph.nodes:
+            if("pos" in node.kwargs):
+                del node.kwargs["pos"]
+                del node.kwargs["size"]
+        
     def paintSubgraph(self, subgraph, painter, pen, brush):
         if("color" in subgraph.kwargs.keys()):
             pen.setColor(QColor(subgraph.kwargs["color"]))
@@ -132,8 +147,6 @@ class QGraphViz(QWidget):
                 brush=QBrush(QColor(subgraph.kwargs["fillcolor"]))
         else:
             brush=QBrush(QColor("white"))
-
-
 
         if("width" in subgraph.kwargs.keys()):
             pen.setWidth(int(subgraph.kwargs["width"]))
@@ -200,6 +213,7 @@ class QGraphViz(QWidget):
                 offset[0]=20*(nb_next/2)
             else:
                 offset[0]=-20*(nb_next/2)
+
             path = QPainterPath()
             path.moveTo(gspos[0],gspos[1])
             path.cubicTo(gspos[0],gspos[1],offset[0]+(gspos[0]+gdpos[0])/2,(gspos[1]+gdpos[1])/2,gdpos[0],gdpos[1])
@@ -606,8 +620,12 @@ class QGraphViz(QWidget):
                         del selected_Node.parent_graph.nodes[selected_Node.parent_graph.nodes.index(selected_Node)]
                         s.nodes.append(selected_Node)
                         selected_Node.parent_graph = s
+                        if(self.auto_freeze):
+                            self.freeze()
                         self.build()
                         self.repaint()
+                if(self.auto_freeze):
+                    self.freeze()
 
         # Connecting edges
         if(self.manipulation_mode==QGraphVizManipulationMode.Edges_Connect_Mode):

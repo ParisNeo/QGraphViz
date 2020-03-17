@@ -28,6 +28,17 @@ class Dot(LayoutEngine):
         n.processed+=1
         width = 0
         height = 0
+        if("pos" in n.kwargs):
+            n.pos[0]=n.kwargs["pos"][0]
+            n.pos[1]=n.kwargs["pos"][1]
+            n.size[0]=n.kwargs["size"][0]
+            n.size[1]=n.kwargs["size"][1]
+            for i,oe in enumerate(n.out_edges):
+                if (oe.dest.processed<20):
+                    self.process(oe.dest, graph, i,len(n.out_edges))
+
+            return
+
         if("label" in n.kwargs.keys()):
             if(n.kwargs["label"]!=""):
                 rect = self.fm.boundingRect(n.kwargs["label"])

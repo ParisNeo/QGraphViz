@@ -46,7 +46,7 @@ if __name__ == "__main__":
     show_subgraphs=True
     qgv = QGraphViz(
         show_subgraphs=show_subgraphs,
-        
+        auto_freeze= True, # show autofreeze capability
         node_selected_callback=node_selected,
         edge_selected_callback=edge_selected,
         node_invoked_callback=node_invoked,
