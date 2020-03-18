@@ -1,5 +1,13 @@
 # ChangeLog
 
+## V 0.0.41
+
+Bugfix : Deselecting node before saving graph to avoid saving the node with the hilight on
+
+## V 0.0.40
+
+Bugfix : Reared bug. When  autofreeze is activated, new nodes are added in position 50,50 without automatic position recomputing
+
 ## V 0.0.39
 
 Feature: Added the position to freeze the graph. This can be done either by activating autofreeze, or by calling freeze method of QGraphViz.

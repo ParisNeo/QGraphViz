@@ -490,6 +490,11 @@ class QGraphViz(QWidget):
         self.update()
 
     def save(self, filename):
+        #BUGFIX : unhilight node before saving
+        if(self.hovered_Node is not None):
+            self.hovered_Node.kwargs["width"] = self.hovered_Node_Back_width
+            self.hovered_Node = None
+
         self.parser.save(filename, self.engine.graph)
 
     def saveAsJson(self, filename):

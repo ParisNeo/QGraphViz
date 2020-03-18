@@ -33,6 +33,7 @@ class Dot(LayoutEngine):
             n.pos[1]=n.kwargs["pos"][1]
             n.size[0]=n.kwargs["size"][0]
             n.size[1]=n.kwargs["size"][1]
+            graph.current_x += n.size[0] + self.default_min_nodes_dist
             for i,oe in enumerate(n.out_edges):
                 if (oe.dest.processed<20):
                     self.process(oe.dest, graph, i,len(n.out_edges))
@@ -84,9 +85,6 @@ class Dot(LayoutEngine):
             n.pos[1]=self.default_node_height/2
 
             graph.current_x += width + self.default_min_nodes_dist
-            for i,oe in enumerate(n.out_edges):
-                if (oe.dest.processed<20):
-                    self.process(oe.dest, graph, i,len(n.out_edges))
         else:
             x=(width + self.default_min_nodes_dist)*(-(nb_brothers-1)/2+index)
             y=0
@@ -106,9 +104,9 @@ class Dot(LayoutEngine):
             n.pos[0]=x
             n.pos[1]=y
                     
-            for i,oe in enumerate(n.out_edges):
-                if oe.dest.processed<20:
-                    self.process(oe.dest, graph, i,len(n.out_edges))
+        for i,oe in enumerate(n.out_edges):
+            if oe.dest.processed<20:
+                self.process(oe.dest, graph, i,len(n.out_edges))
 
     def build_graph(self, graph):
         for n in graph.nodes:
