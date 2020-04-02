@@ -6,7 +6,7 @@ Author: Saifeddine ALOUI
 Description:
 Dot perser implementation
 """
-
+from PyQt5.QtGui import QFontMetrics, QFont
 class Node():
     """
     The dot graphviz engine
@@ -21,7 +21,11 @@ class Node():
         self.in_edges=[]
         self.out_edges=[]
         self.processed = 0
-        
+
+        self.font = QFont("Arial", 12)
+        self.fm = QFontMetrics(self.font)
+
+
     @property
     def global_pos(self):
         if(self.parent_graph is not None):

@@ -97,3 +97,26 @@ class Graph(Node):
             self.edges.append(ed)
             
         return self
+
+    def getRect(self):
+        x = 0
+        y = 0
+        w = 0
+        h = 0
+        for n in self.nodes:
+            x_ = n.pos[0]
+            y_ = n.pos[1]
+            w_ = n.size[0]
+            h_ = n.size[1]
+
+            if x_<x :
+                x=x_
+            if y_<y :
+                y=y_
+            if(x+w<x_+w_):
+                w=x_+w_-x
+            if(y+h<y_+h_):
+                h=y_+h_-y 
+        return x,y,w,h
+
+

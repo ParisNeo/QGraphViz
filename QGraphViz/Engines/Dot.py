@@ -51,42 +51,25 @@ class Dot(LayoutEngine):
             height=self.default_node_height
 
         if(type(n)==Graph and self.show_subgraphs):
-            if len(n.nodes)>0:
-                minx=10000
-                miny=10000
-                maxx=0
-                maxy=0
-                self.build_graph(n)
-                for i, node in enumerate(n.nodes):
-
-                    if(node.pos[0]<minx):
-                        minx = node.pos[0]-node.size[0]/2
-                    if(node.pos[1]<miny):
-                        miny = node.pos[1]-node.size[1]/2
-
-                    if(node.pos[0]>maxx):
-                        maxx = node.pos[0]+node.size[0]/2
-                    if(node.pos[1]>maxy):
-                        maxy = node.pos[1]+node.size[1]/2
-
-                w=maxx-minx+2*self.margins
-                h=maxy-miny+2*self.margins
-                width = w if w>width else width
-                height = h if h>height else height
-            else:
-                graph.size=[width, height]
+            for nn in n.nodes:
+                self.process(nn, n, 0, len(n.nodes))
+            _,_,w_,h_=n.getRect()
+            #w_+=2*self.default_min_nodes_dist
+            width = w_ if w_>width else width
+            height = h_ if h_>height else height
+            
         
 
         n.size[0]=width
         n.size[1]=height
 
         if len(n.in_edges)==0:
-            n.pos[0]=graph.current_x
+            n.pos[0]=graph.current_x+width/2
             n.pos[1]=self.default_node_height/2
 
-            graph.current_x += width + self.default_min_nodes_dist
+            graph.current_x += width/2 + self.default_min_nodes_dist
         else:
-            x=(width + self.default_min_nodes_dist)*(-(nb_brothers-1)/2+index)
+            x=(width/2 + self.default_min_nodes_dist)*(-(nb_brothers-1)/2+index)
             y=0
             for i,oe in enumerate(n.out_edges):
                 if (oe.dest.processed<20):
@@ -97,8 +80,8 @@ class Dot(LayoutEngine):
                     self.process(edg.source, graph)
                 if(n.parent_graph == edg.source.parent_graph):
                     x += edg.source.pos[0]
-                    if(y<edg.source.pos[1]+width/2+self.default_min_nodes_dist):
-                        y = edg.source.pos[1]+width/2+self.default_min_nodes_dist
+                    if(y<edg.source.pos[1]+height/2+self.default_min_nodes_dist):
+                        y = edg.source.pos[1]+height/2+self.default_min_nodes_dist
             x/=len(n.in_edges)
 
             n.pos[0]=x

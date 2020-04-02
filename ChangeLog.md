@@ -1,5 +1,13 @@
 # ChangeLog
 
+## V 0.0.43
+
+Bugfix : README.MD repared
+
+## V 0.0.42
+
+Feature : QGraphViz is now set inside a QScrollarea and changes its size when the graph size changes 
+
 ## V 0.0.41
 
 Bugfix : Deselecting node before saving graph to avoid saving the node with the hilight on
