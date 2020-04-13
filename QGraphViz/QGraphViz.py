@@ -559,11 +559,6 @@ class QGraphViz_Core(QWidget):
         pen=QPen()
         brush.setColor(Qt.white)
 
-        if(self.show_subgraphs):
-            for node in graph.nodes:
-                if type(node)==Graph:
-                    subgraph = node
-                    self.paintSubgraph(subgraph, painter, pen, brush)
 
         for i,edge in enumerate(graph.edges):
             if("color" in edge.kwargs.keys()):
@@ -608,6 +603,13 @@ class QGraphViz_Core(QWidget):
             gdpos[0],
             gdpos[1])
             """
+
+        if(self.show_subgraphs):
+            for node in graph.nodes:
+                if type(node)==Graph:
+                    subgraph = node
+                    self.paintSubgraph(subgraph, painter, pen, brush)
+                    
          # TODO : add more painting parameters
         for node in graph.nodes:
             if type(node)!=Graph:

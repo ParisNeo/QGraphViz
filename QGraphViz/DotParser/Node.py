@@ -29,7 +29,10 @@ class Node():
     @property
     def global_pos(self):
         if(self.parent_graph is not None):
-            return [self.pos[0]+self.parent_graph.pos[0], self.pos[1]+self.parent_graph.pos[1]]
+            return [
+                self.pos[0]+self.parent_graph.pos[0]-self.parent_graph.size[0]/2, 
+                self.pos[1]+self.parent_graph.pos[1]-self.parent_graph.size[1]/2
+                ]
         else:
             return self.pos
 

@@ -1,9 +1,12 @@
 import setuptools
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+#with open("README.md", "r") as fh:
+#    long_description = fh.read()
+long_description="""
+Project information here https://github.com/ParisNeo/QGraphViz
+"""
 setuptools.setup(
      name='QGraphViz',  
-     version='0.0.43',
+     version='0.0.44',
      author="Saifeddine ALOUI",
      author_email="aloui.saifeddine@gmail.com",
      description="A PyQt5 widget to manipulate (build, render, interact, load and save) Graphviz graphs",

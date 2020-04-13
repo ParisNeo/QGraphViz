@@ -1,5 +1,9 @@
 # ChangeLog
 
+## V 0.0.44
+
+Bugfix : Subgraph Positioning is now working
+
 ## V 0.0.43
 
 Bugfix : README.MD repared
