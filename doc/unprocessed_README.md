@@ -47,8 +47,8 @@ pip install QGraphViz
 8. User application is informed when a edge is selected or double clicked.
 9. Only two supported node shapes (box or oval)
 10. Advanced nodes shapes are not yet implemented
-11. Subgraphs are not supported yet
-12. Only the dot layout is implemented
+11. Only the dot layout is implemented
+12. Supported shapes are box, circle, triangle, diamond, polygon 
 
 ## Example code
 

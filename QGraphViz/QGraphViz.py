@@ -8,7 +8,7 @@ Main Class to QGraphViz tool
 """
 from PyQt5.QtWidgets import QApplication, QWidget, QScrollArea, QSizePolicy
 from PyQt5.QtGui import QPainter, QPen, QBrush, QColor, QPainterPath, QImage, QLinearGradient
-from PyQt5.QtCore import Qt, QRect
+from PyQt5.QtCore import Qt, QRect, QRectF
 import os
 import sys
 import enum
@@ -648,11 +648,49 @@ class QGraphViz_Core(QWidget):
                                     gpos[1]-node.size[1]/2,
                                     node.size[0], node.size[1])
 
-                    if(node.kwargs["shape"]=="circle"):
+                    elif(node.kwargs["shape"]=="circle"):
                         painter.drawEllipse(
                                     gpos[0]-node.size[0]/2,
                                     gpos[1]-node.size[1]/2,
                                     node.size[0], node.size[1])
+                    elif(node.kwargs["shape"]=="triangle"):
+                        rect = QRect(gpos[0]-node.size[0]/2, gpos[1]-2*node.size[1]/3, node.size[0], node.size[1])
+
+                        path = QPainterPath()
+                        path.moveTo(rect.left() + (rect.width() / 2), rect.top())
+                        path.lineTo(rect.bottomLeft())
+                        path.lineTo(rect.bottomRight())
+                        path.lineTo(rect.left() + (rect.width() / 2), rect.top())
+
+                        painter.fillPath(path, brush)
+                        painter.drawPath(path)
+                    elif(node.kwargs["shape"]=="polygon"):
+                        rect = QRect(gpos[0]-node.size[0]/2, gpos[1]-node.size[1]/2, node.size[0], node.size[1])
+
+                        path = QPainterPath()
+                        path.moveTo(rect.left() + (rect.width() / 4), rect.top())
+                        path.lineTo(rect.left() + 3*rect.width()/4, rect.top())
+                        path.lineTo(rect.left() + rect.width(), rect.top() + rect.height()/2)
+                        path.lineTo(rect.left() + 3*rect.width()/4, rect.top() + rect.height())
+                        path.lineTo(rect.left() + rect.width()/4, rect.top() + rect.height())
+                        path.lineTo(rect.left(), rect.top() + rect.height()/2)
+                        path.lineTo(rect.left() + (rect.width() / 4), rect.top())
+ 
+                        painter.fillPath(path, brush)
+                        painter.drawPath(path)
+                    elif(node.kwargs["shape"]=="diamond"):
+                        rect = QRect(gpos[0]-node.size[0]/2, gpos[1]-node.size[1]/2, node.size[0], node.size[1])
+
+                        path = QPainterPath()
+                        path.moveTo(rect.left() + (rect.width() / 2), rect.top())
+                        path.lineTo(rect.left() + rect.width(), rect.top() + rect.height()/2)
+                        path.lineTo(rect.left() + rect.width()/2, rect.top() + rect.height())
+                        path.lineTo(rect.left(), rect.top() + rect.height()/2)
+                        path.lineTo(rect.left() + (rect.width() / 2), rect.top())
+ 
+                        painter.fillPath(path, brush)
+                        painter.drawPath(path)
+
                     
                     # Image as a node, this implementation checks to see if a 
                     # file path was provided in the shape parameter

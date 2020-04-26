@@ -63,10 +63,10 @@ if __name__ == "__main__":
     # Define sone graph
     n1 = qgv.addNode(qgv.engine.graph, "Node1", label="N1", fillcolor="red")
     n2 = qgv.addNode(qgv.engine.graph, "Node2", label="N2", fillcolor="blue:white:red")
-    n3 = qgv.addNode(qgv.engine.graph, "Node3", label="N3")
-    n4 = qgv.addNode(qgv.engine.graph, "Node4", label="N4")
-    n5 = qgv.addNode(qgv.engine.graph, "Node5", label="N5")
-    n6 = qgv.addNode(qgv.engine.graph, "Node6", label="N6")
+    n3 = qgv.addNode(qgv.engine.graph, "Node3", label="N3", shape = "diamond",fillcolor="orange")
+    n4 = qgv.addNode(qgv.engine.graph, "Node4", label="N4", shape="diamond",fillcolor="white")
+    n5 = qgv.addNode(qgv.engine.graph, "Node5", label="N5", shape="polygon", fillcolor="red", color="white")
+    n6 = qgv.addNode(qgv.engine.graph, "Node6", label="N6", shape="triangle", fillcolor="blue:white:red")
 
     sub = qgv.addSubgraph(qgv.engine.graph, "sub graph", qgv.engine.graph.graph_type, label="Subgraph", fillcolor="blue:white:red")
     n7 = qgv.addNode(sub, "Node7", label="N7")

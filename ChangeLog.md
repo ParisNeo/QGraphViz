@@ -1,5 +1,12 @@
 # ChangeLog
 
+## V 0.0.45
+
+Feature : Added new shapes :
+triangle
+polygon
+diamond
+
 ## V 0.0.44
 
 Bugfix : Subgraph Positioning is now working
