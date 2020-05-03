@@ -1,5 +1,30 @@
 # ChangeLog
 
+## V 0.0.49
+
+Bugfix: Image size is now taken in consideration by the dot engine
+Feature : Support multilines labels
+Feature : Text font may be selected when engine is created
+Feature : Margins are now modifiable (set them when the engine is created)
+
+
+## V 0.0.48
+
+Bugfix : Loading relative path images is now fixed
+
+## V 0.0.47
+
+Bugfix : self.current_path was not initialized at startup and when loading files resulting in a crush if an image file is used with relative path. Now this is corrected
+
+## V 0.0.46
+
+Feature : Added the possibility to use png files as shapes while controlling the size of the node :
+while creating the node shape, you can use this form to specify shape:
+"shape"="{},{},{}".format(path,width,height)
+or simply:
+"shape"="{}".format(path)
+In this case, the size will fit the image file size
+
 ## V 0.0.45
 
 Feature : Added new shapes :

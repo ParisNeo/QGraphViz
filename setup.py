@@ -6,7 +6,7 @@ Project information here https://github.com/ParisNeo/QGraphViz
 """
 setuptools.setup(
      name='QGraphViz',  
-     version='0.0.45',
+     version='0.0.49',
      author="Saifeddine ALOUI",
      author_email="aloui.saifeddine@gmail.com",
      description="A PyQt5 widget to manipulate (build, render, interact, load and save) Graphviz graphs",

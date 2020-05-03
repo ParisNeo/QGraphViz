@@ -17,6 +17,9 @@ from QGraphViz.QGraphViz import QGraphViz, QGraphVizManipulationMode
 from QGraphViz.DotParser import Graph, GraphType
 from QGraphViz.Engines import Dot
 
+
+from PyQt5.QtGui import QFontMetrics, QFont, QImage
+
 if __name__ == "__main__":
     # Create QT application
     app = QApplication(sys.argv)
@@ -59,7 +62,7 @@ if __name__ == "__main__":
         )
     qgv.setStyleSheet("background-color:white;")
     # Create A new Graph using Dot layout engine
-    qgv.new(Dot(Graph("Main_Graph"), show_subgraphs=show_subgraphs))
+    qgv.new(Dot(Graph("Main_Graph"), show_subgraphs=show_subgraphs, font = QFont("Arial", 12),margins=[20,20]))
     # Define sone graph
     n1 = qgv.addNode(qgv.engine.graph, "Node1", label="N1", fillcolor="red")
     n2 = qgv.addNode(qgv.engine.graph, "Node2", label="N2", fillcolor="blue:white:red")
@@ -73,8 +76,11 @@ if __name__ == "__main__":
     n8 = qgv.addNode(sub, "Node8", label="N8")
 
     # Adding nodes with an image as its shape
-    icon_path = os.path.dirname(os.path.abspath(__file__)) + r"\icon\dbicon.png"
+    icon_path = os.path.dirname(os.path.abspath(__file__)) + r"\icon\dbicon.png,100,100"
     n9 = qgv.addNode(qgv.engine.graph, "Node9", label="N9", shape=icon_path)
+
+    icon_path = os.path.dirname(os.path.abspath(__file__)) + r"\icon\cam.png"
+    n10 = qgv.addNode(qgv.engine.graph, "Node10", label="\n\n\nN10\nTest multilines", shape=icon_path, color="white")
 
     qgv.addEdge(n1, n2, {})
     qgv.addEdge(n3, n2, {})
@@ -83,6 +89,7 @@ if __name__ == "__main__":
     qgv.addEdge(n4, n6, {"width":5,"color":"red"})
     qgv.addEdge(n3, n6, {"width":2})
     qgv.addEdge(n6, n9, {"width":5,"color":"red"})
+    qgv.addEdge(n9, n10, {"width":5,"color":"red"})
 
 
     # Build the graph (the layout engine organizes where the nodes and connections are)

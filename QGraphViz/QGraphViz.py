@@ -233,13 +233,16 @@ class QGraphViz_Core(QWidget):
 
     def load_file(self, filename):
         self.engine.graph = self.parser.parseFile(filename)
+        self.engine.current_path = filename
         self.build()
         self.update()
 
     def loadAJson(self, filename):
         self.engine.graph = self.parser.fromJSON(filename)
+        self.engine.current_path = filename
         self.build()
         self.update()
+        
 
     def save(self, filename):
         #BUGFIX : unhilight node before saving
@@ -248,9 +251,11 @@ class QGraphViz_Core(QWidget):
             self.hovered_Node = None
 
         self.parser.save(filename, self.engine.graph)
+        self.engine.current_path=filename
 
     def saveAsJson(self, filename):
         self.parser.toJSON(filename, self.engine.graph)
+        self.engine.current_path=filename
 
 
     # ================== Helper methods ==================
@@ -691,18 +696,51 @@ class QGraphViz_Core(QWidget):
                         painter.fillPath(path, brush)
                         painter.drawPath(path)
 
-                    
-                    # Image as a node, this implementation checks to see if a 
-                    # file path was provided in the shape parameter
-                    if(os.path.isfile(node.kwargs["shape"])): 
-                        img_path = node.kwargs["shape"]
-                        painter.drawImage(
-                            QRect(
-                                gpos[0]-node.size[0]/2,
-                                gpos[1]-node.size[1]/2,
-                                node.size[0],
-                                node.size[1]), 
-                            QImage(img_path))
+                    else: # assuming this is an image
+                        # this parameter can be either direct image path
+                        # or a relative path (relative to the file path)
+                        # It can contain the format path,width,height
+                        # or simple path in which case the image file size will be used
+                        image = None
+                        width = 0
+                        height = 0
+                        if("," in node.kwargs["shape"]): # if there is a , in the shape, the first part is the path, then width, then height
+                            img_params = node.kwargs["shape"].split(",")
+                            if len(img_params)==3:# img:width:height
+                                img_path = img_params[0]
+                                width =  int(img_params[1])
+                                height =  int(img_params[2])
+                                img_path2 = os.path.join(os.path.dirname(self.engine.current_path),img_path)
+                                if(os.path.isfile(img_path)):
+                                    image = QImage(img_path)
+                                elif(os.path.isfile(img_path2)):
+                                    image = QImage(img_path2)
+                        else:
+                            img_path = node.kwargs["shape"]
+                            img_path2 = os.path.join(os.path.dirname(self.engine.current_path),img_path)
+                            if(os.path.isfile(img_path)):
+                                image = QImage(img_path)
+                                width =  image.size().width()
+                                height =  image.size().height()
+                            elif(os.path.isfile(img_path2)):
+                                image = QImage(img_path2)
+                                width =  image.size().width()
+                                height =  image.size().height()
+                                if width==0:
+                                    width=100
+                                if height==0:
+                                    height=100
+
+                        if image is not None:
+                            node.size[0] = width if width>node.size[0] else node.size[0]
+                            node.size[1] = height if height>node.size[1] else node.size[1]
+                            painter.drawImage(
+                                QRect(
+                                    gpos[0]-node.size[0]/2,
+                                    gpos[1]-node.size[1]/2,
+                                    node.size[0],
+                                    node.size[1]), 
+                                image)
                 else:
                     painter.drawEllipse(
                                 gpos[0]-node.size[0]/2,
@@ -711,10 +749,22 @@ class QGraphViz_Core(QWidget):
 
 
                 if("label" in node.kwargs.keys()):
+                    txt = node.kwargs["label"].split("\n")
+                    width = 0
+                    height = 0
+                    for t in txt:
+                        if(t==""):
+                            t="A"
+                        rect = self.engine.fm.boundingRect(t)
+                        width=rect.width() if rect.width()>width else width
+                        height+=rect.height()
+
+                    width+=self.engine.margins[0]
+                    height+self.engine.margins[1]
                     painter.drawText(
-                        gpos[0]-node.size[0]/2,
-                        gpos[1]-node.size[1]/2,
-                        node.size[0], node.size[1],
+                        gpos[0]-width/2,
+                        gpos[1]-height/2,
+                        width, height,
                         Qt.AlignCenter|Qt.AlignTop,node.kwargs["label"])
             else:
                 if(self.show_subgraphs):

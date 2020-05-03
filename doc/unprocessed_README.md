@@ -49,6 +49,7 @@ pip install QGraphViz
 10. Advanced nodes shapes are not yet implemented
 11. Only the dot layout is implemented
 12. Supported shapes are box, circle, triangle, diamond, polygon 
+13. Supported custom node shapes using png images
 
 ## Example code
 
