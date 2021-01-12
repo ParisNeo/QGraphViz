@@ -1,5 +1,9 @@
 # ChangeLog
 
+## V 0.0.54
+Version jump for compatibility problems
+Bugfix : Nodes and edges are now selectable starting from the top
+
 ## V 0.0.49
 
 Bugfix: Image size is now taken in consideration by the dot engine

@@ -2,14 +2,25 @@
 
 ## Create distribution
 
+On linux:
+```bash
+python3 setup.py sdist bdist_wheel
+```
+On Windows:
 ```bash
 python setup.py sdist bdist_wheel
 ```
 
 ## Install it
 
-To install QGraphViz locally without pushing it to pip do the following
+To install QGraphViz locally while pointing to the QGraphviz path (useful to test and debug the library using another software). Assuming you are in the root path
 
+```bash
+python -m pip install --upgrade --force-reinstall -e .
+```
+
+
+To install QGraphViz locally without pushing it to pip do the following
 ```bash
 python -m pip install --upgrade --force-reinstall dist/QGraphViz-*.*.*-py3-none-any.whl
 ```
@@ -17,6 +28,9 @@ python -m pip install --upgrade --force-reinstall dist/QGraphViz-*.*.*-py3-none-
 replace * with the version you are using
 
 ## Publish it
+You would need to install twine before pushing the file
+
+pip install twine
 
 python -m twine upload dist/*
 

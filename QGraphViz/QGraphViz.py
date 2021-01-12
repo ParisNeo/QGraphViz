@@ -321,13 +321,17 @@ class QGraphViz_Core(QWidget):
         return False
                     
     def findNode(self, graph, x, y):
-        for n in graph.nodes:
+        """Finds a node by position
+        """
+        for n in reversed(graph.nodes):
             if(self.isNodeHovered(n, x, y)):
                 return n
         return None
 
     def findEdge(self, graph, x, y):
-        for i,e in enumerate(graph.edges):
+        """Finds an edge by position
+        """
+        for i,e in enumerate(reversed(graph.edges)):
             if(self.isEdgeHovered(graph, i, e, x, y)):
                 return e,i
         return None,0
