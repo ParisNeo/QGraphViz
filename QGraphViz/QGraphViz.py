@@ -186,19 +186,40 @@ class QGraphViz_Core(QWidget):
             if(self.node_removed_callback is not None):
                 self.node_removed_callback(node)
             for edge in node.in_edges:
-                del edge.source.out_edges[edge.source.out_edges.index(edge)]
+                try:
+                    del edge.source.out_edges[edge.source.out_edges.index(edge)]
+                except:
+                    pass
                 if edge.source.parent_graph == edge.dest.parent_graph:
-                    del edge.source.parent_graph.edges[edge.source.parent_graph.edges.index(edge)]
+                    try:
+                        del edge.source.parent_graph.edges[edge.source.parent_graph.edges.index(edge)]
+                    except:
+                        pass
                 else:
-                    del self.engine.graph.edges[self.engine.graph.edges.index(edge)]
+                    try:
+                        del self.engine.graph.edges[self.engine.graph.edges.index(edge)]
+                    except:
+                        pass
 
             for edge in node.out_edges:
-                del edge.source.out_edges[edge.source.out_edges.index(edge)]
+                try:
+                    del edge.source.out_edges[edge.source.out_edges.index(edge)]
+                except:
+                    pass
                 if edge.source.parent_graph == edge.dest.parent_graph:
-                    del edge.source.parent_graph.edges[edge.source.parent_graph.edges.index(edge)]
+                    try:
+                        del edge.source.parent_graph.edges[edge.source.parent_graph.edges.index(edge)]
+                    except:
+                        pass
                 else:
-                    del self.engine.graph.edges[self.engine.graph.edges.index(edge)]
-            del graph.nodes[idx]
+                    try:
+                        del self.engine.graph.edges[self.engine.graph.edges.index(edge)]
+                    except:
+                        pass
+            try:
+                del graph.nodes[idx]
+            except:
+                pass
             self.repaint()
 
     def removeSubgraph(self, subgraph):
