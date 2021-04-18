@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Author: Saifeddine ALOUI
+Author: Saifeddine ALOUI with suggestions from BryanSouth
 Description:
 A simple graphviz graphs viewer that enables creating graphs visually, 
 manipulate them and save them
