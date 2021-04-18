@@ -1,5 +1,8 @@
 # ChangeLog
 
+## V 0.0.55
+Bugfix: multiple subgraphs leads to only showing lates subgraph
+
 ## V 0.0.54
 Version jump for compatibility problems
 Bugfix : Nodes and edges are now selectable starting from the top

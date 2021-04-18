@@ -634,12 +634,7 @@ class QGraphViz_Core(QWidget):
             gdpos[1])
             """
 
-        if(self.show_subgraphs):
-            for node in graph.nodes:
-                if type(node)==Graph:
-                    subgraph = node
-                    self.paintSubgraph(subgraph, painter, pen, brush)
-                    
+                   
          # TODO : add more painting parameters
         for node in graph.nodes:
             if type(node)!=Graph:
@@ -792,11 +787,17 @@ class QGraphViz_Core(QWidget):
                         width, height,
                         Qt.AlignCenter|Qt.AlignTop,node.kwargs["label"])
             else:
+                subgraph = node
+                self.paintSubgraph(subgraph, painter, pen, brush)
                 if(self.show_subgraphs):
                     self.paintGraph(subgraph, painter)
-                else:
-                    subgraph = node
-                    self.paintSubgraph(subgraph, painter, pen, brush)
+        """
+        if(self.show_subgraphs):
+            for subgraph in graph.nodes:
+                if type(subgraph)==Graph:
+                    self.paintSubgraph(subgraph, painter, pen, brush)    
+                    self.paintGraph(subgraph, painter)     
+        """           
 
     def paintEvent(self, event):
         painter = QPainter(self) 
