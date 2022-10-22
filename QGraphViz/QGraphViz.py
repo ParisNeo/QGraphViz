@@ -573,14 +573,14 @@ class QGraphViz_Core(QWidget):
         gpos = subgraph.global_pos
 
         painter.drawRect(
-                    gpos[0]-subgraph.size[0]/2,
-                    gpos[1]-subgraph.size[1]/2,
+                    int(gpos[0]-subgraph.size[0]/2),
+                    int(gpos[1]-subgraph.size[1]/2),
                     subgraph.size[0], subgraph.size[1])
 
         if("label" in subgraph.kwargs.keys()):
             painter.drawText(
-                gpos[0]-subgraph.size[0]/2,
-                gpos[1]-subgraph.size[1]/2,
+                int(gpos[0]-subgraph.size[0]/2),
+                int(gpos[1]-subgraph.size[1]/2),
                 subgraph.size[0], subgraph.size[1],
                 Qt.AlignCenter|Qt.AlignTop,subgraph.kwargs["label"])
 
@@ -669,17 +669,17 @@ class QGraphViz_Core(QWidget):
                 if("shape" in node.kwargs.keys()):
                     if(node.kwargs["shape"]=="box"):
                         painter.drawRect(
-                                    gpos[0]-node.size[0]/2,
-                                    gpos[1]-node.size[1]/2,
+                                    int(gpos[0]-node.size[0]/2),
+                                    int(gpos[1]-node.size[1]/2),
                                     node.size[0], node.size[1])
 
                     elif(node.kwargs["shape"]=="circle"):
                         painter.drawEllipse(
-                                    gpos[0]-node.size[0]/2,
-                                    gpos[1]-node.size[1]/2,
+                                    int(gpos[0]-node.size[0]/2),
+                                    int(gpos[1]-node.size[1]/2),
                                     node.size[0], node.size[1])
                     elif(node.kwargs["shape"]=="triangle"):
-                        rect = QRect(gpos[0]-node.size[0]/2, gpos[1]-2*node.size[1]/3, node.size[0], node.size[1])
+                        rect = QRect(int(gpos[0]-node.size[0]/2), int(gpos[1]-2*node.size[1]/3), node.size[0], node.size[1])
 
                         path = QPainterPath()
                         path.moveTo(rect.left() + (rect.width() / 2), rect.top())
@@ -690,7 +690,7 @@ class QGraphViz_Core(QWidget):
                         painter.fillPath(path, brush)
                         painter.drawPath(path)
                     elif(node.kwargs["shape"]=="polygon"):
-                        rect = QRect(gpos[0]-node.size[0]/2, gpos[1]-node.size[1]/2, node.size[0], node.size[1])
+                        rect = QRect(int(gpos[0]-node.size[0]/2), int(gpos[1]-node.size[1]/2), node.size[0], node.size[1])
 
                         path = QPainterPath()
                         path.moveTo(rect.left() + (rect.width() / 4), rect.top())
@@ -704,7 +704,7 @@ class QGraphViz_Core(QWidget):
                         painter.fillPath(path, brush)
                         painter.drawPath(path)
                     elif(node.kwargs["shape"]=="diamond"):
-                        rect = QRect(gpos[0]-node.size[0]/2, gpos[1]-node.size[1]/2, node.size[0], node.size[1])
+                        rect = QRect(int(gpos[0]-node.size[0]/2), int(gpos[1]-node.size[1]/2), node.size[0], node.size[1])
 
                         path = QPainterPath()
                         path.moveTo(rect.left() + (rect.width() / 2), rect.top())
@@ -756,15 +756,15 @@ class QGraphViz_Core(QWidget):
                             node.size[1] = height if height>node.size[1] else node.size[1]
                             painter.drawImage(
                                 QRect(
-                                    gpos[0]-node.size[0]/2,
-                                    gpos[1]-node.size[1]/2,
+                                    int(gpos[0]-node.size[0]/2),
+                                    int(gpos[1]-node.size[1]/2),
                                     node.size[0],
                                     node.size[1]), 
                                 image)
                 else:
                     painter.drawEllipse(
-                                gpos[0]-node.size[0]/2,
-                                gpos[1]-node.size[1]/2,
+                                int(gpos[0]-node.size[0]/2),
+                                int(gpos[1]-node.size[1]/2),
                                 node.size[0], node.size[1])
 
 
@@ -782,8 +782,8 @@ class QGraphViz_Core(QWidget):
                     width+=self.engine.margins[0]
                     height+self.engine.margins[1]
                     painter.drawText(
-                        gpos[0]-width/2,
-                        gpos[1]-height/2,
+                        int(gpos[0]-width/2),
+                        int(gpos[1]-height/2),
                         width, height,
                         Qt.AlignCenter|Qt.AlignTop,node.kwargs["label"])
             else:
