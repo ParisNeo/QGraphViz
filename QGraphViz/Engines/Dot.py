@@ -35,9 +35,12 @@ class Dot(LayoutEngine):
         if type(n)==Graph:
             for nn in n.nodes:
                 self.process_size(nn)
-        
+
         if("label" in n.kwargs.keys()):
-            if(n.kwargs["label"]!=""):
+            if ("size" in n.kwargs.keys()):
+                width = n.kwargs["size"][0]
+                height = n.kwargs["size"][1]
+            elif(n.kwargs["label"]!=""):
                 rect = self.fm.boundingRect(n.kwargs["label"])
                 width=rect.width()+self.margins[0]
                 height=rect.height()+self.margins[1]
@@ -86,11 +89,11 @@ class Dot(LayoutEngine):
             height = h_ if h_>height else height
             width += 2*self.margins[0]
             height += 2*self.margins[1]
-            
-        
+
+
 
         n.size[0]=width
-        n.size[1]=height        
+        n.size[1]=height
 
     def process(self, n, graph, index=0, nb_brothers=0, depth=0, stage=0):
         n.processed+=1
@@ -140,7 +143,7 @@ class Dot(LayoutEngine):
 
             n.pos[0]=x
             n.pos[1]=y
-                    
+
         for i,oe in enumerate(n.out_edges):
             if oe.dest.processed<20:
                 self.process(oe.dest, graph, i,len(n.out_edges))
@@ -149,12 +152,12 @@ class Dot(LayoutEngine):
             n.depth_x_pos=[0]
             for nn in n.nodes:
                 self.process(nn, n, 0, len(n.nodes), depth=depth)
-            
+
 
     def build_graph(self, graph):
         for n in graph.nodes:
             n.processed=0
-         
+
         for i,n in enumerate(graph.nodes):
             self.process_size(n)
 
