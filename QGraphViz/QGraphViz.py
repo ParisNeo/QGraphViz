@@ -7,8 +7,8 @@ Description:
 Main Class to QGraphViz tool
 """
 from PyQt5.QtWidgets import QApplication, QWidget, QScrollArea, QSizePolicy
-from PyQt5.QtGui import QPainter, QPen, QBrush, QColor, QPainterPath, QImage, QLinearGradient
-from PyQt5.QtCore import Qt, QRect, QRectF
+from PyQt5.QtGui import QPainter, QPen, QBrush, QColor, QPainterPath, QImage, QLinearGradient, QPolygonF
+from PyQt5.QtCore import Qt, QRect, QPoint, QLineF, QPointF
 import os
 import sys
 import enum
@@ -37,7 +37,7 @@ class QGraphViz_Core(QWidget):
                     manipulation_mode=QGraphVizManipulationMode.Nodes_Move_Mode,
                     # Callbacks
                     new_edge_beingAdded_callback=None, # A callback called when a new connection is being added (should return True or False to accept or not the edge, as well as return the edge parameters)
-                    new_edge_created_callback=None, # A callbakc called when a new connection is created between two nodes using the GUI
+                    new_edge_created_callback=None, # A callback called when a new connection is created between two nodes using the GUI
                     node_selected_callback=None, # A callback called when a node is clicked
                     edge_selected_callback=None, # A callback called when an edge is clicked
                     node_invoked_callback=None, # A callback called when a node is double clicked
@@ -48,7 +48,9 @@ class QGraphViz_Core(QWidget):
                     # Custom options
                     min_cursor_edge_dist=3,
                     hilight_Nodes=False,
-                    hilight_Edges=False
+                    hilight_Edges=False,
+                    is_directed_graph: bool = False,  # Draw an arrow when adding an edge between nodes / subgraph
+                    arrow_size: int = 25              # Used for directed graph
                 ):
         """
         QGraphViz widget Constructor
@@ -59,12 +61,13 @@ class QGraphViz_Core(QWidget):
         :param new_edge_beingAdded_callback: A callback issued when a new edge is being added. This callback should return a boolean to accept or refuse adding the edge.
         :param new_edge_created_callback: A callback issued when a new edge is added.
         :param node_selected_callback: A callback issued when a node is selected.
-        :param edge_selected_callback: A callback issued when an edge is selected.
-        :param node_removed_callback: A callback issued when an node is removed.
-        :param edge_removed_callback: A callback issued when an edge is removed.
+        :param edge_selected_callback: A callback issued when a edge is selected.
+        :param node_removed_callback: A callback issued when a node is removed.
+        :param edge_removed_callback: A callback issued when a edge is removed.
         :param min_cursor_edge_dist: Minimal distance between sursor edge.
         :param hilight_Nodes: If True, whenever mouse is hovered on a node, it is hilighted.
         :param hilight_Edges: If True, whenever mouse is hovered on an edge, it is hilighted.
+        :param is_directed_graph (bool): If True, the edges will be directed, Default is False
         """
         
         QWidget.__init__(self,parent)
@@ -72,14 +75,14 @@ class QGraphViz_Core(QWidget):
         self.setSizePolicy(QSizePolicy.Fixed,QSizePolicy.Fixed)
         # Set core stuff
         self.parser = DotParser()
-        self.engine=engine
+        self.engine = engine
 
         # Set autofreeze status
         self.auto_freeze = auto_freeze
         
         # Pfrepare lists
-        self.qnodes=[]
-        self.qedges=[]
+        self.qnodes = []
+        self.qedges = []
 
         # Nodes manipulation
         self.manipulation_mode = manipulation_mode
@@ -88,9 +91,9 @@ class QGraphViz_Core(QWidget):
         self.hovered_Edge = None
         self.hovered_Edge_id = None
         self.current_pos = [0,0]
-        self.mouse_down=False
-        self.min_cursor_edge_dist=min_cursor_edge_dist
-        self.show_subgraphs=show_subgraphs
+        self.mouse_down = False
+        self.min_cursor_edge_dist = min_cursor_edge_dist
+        self.show_subgraphs = show_subgraphs
 
         # Set callbacks
         self.new_edge_beingAdded_callback = new_edge_beingAdded_callback
@@ -99,11 +102,13 @@ class QGraphViz_Core(QWidget):
         self.edge_selected_callback = edge_selected_callback
         self.node_invoked_callback = node_invoked_callback
         self.edge_invoked_callback = edge_invoked_callback
-        self.node_removed_callback=node_removed_callback
-        self.edge_removed_callback=edge_removed_callback
+        self.node_removed_callback = node_removed_callback
+        self.edge_removed_callback = edge_removed_callback
 
-        self.hilight_Nodes=hilight_Nodes
-        self.hilight_Edges=hilight_Edges
+        self.hilight_Nodes = hilight_Nodes
+        self.hilight_Edges = hilight_Edges
+        self.is_directed_graph = is_directed_graph
+        self._arrow_size = arrow_size
 
         self.setAutoFillBackground(True)
         self.setAttribute(Qt.WA_StyledBackground, True)
@@ -117,7 +122,17 @@ class QGraphViz_Core(QWidget):
         self.engine.build()
         self.updateSize()
 
-        
+    @property
+    def arrow_size(self) -> int:
+        return self._arrow_size
+
+    @arrow_size.setter
+    def arrow_size(self, new_arrow_size: int) -> None:
+        if isinstance(new_arrow_size, int):
+            self._arrow_size = new_arrow_size
+        else:
+            print("wrong type for arrow_size setter, requires an int")
+
     def freeze(self):
         """
         freezes the graph and saves the current nodes positions
@@ -503,11 +518,10 @@ class QGraphViz_Core(QWidget):
                         kwargs={}
                     if add_the_edge:
                         edge = self.addEdge(selected_Node, d, kwargs)
-                        if(add_the_edge):
-                            if(self.new_edge_created_callback is not None):
-                                self.new_edge_created_callback(edge)
+                        if(self.new_edge_created_callback is not None):
+                            self.new_edge_created_callback(edge)
                         self.build()
-                self.selected_Node=None
+                self.selected_Node = None
         # Removing node
         elif(self.manipulation_mode==QGraphVizManipulationMode.Node_remove_Mode):
             if(n is not None):
@@ -609,9 +623,11 @@ class QGraphViz_Core(QWidget):
                 gspos = edge.source.global_pos
 
             if(edge.dest.parent_graph !=graph and not self.show_subgraphs):
-                gspos = edge.dest.parent_graph.global_pos
+                gdpos = edge.dest.parent_graph.global_pos
+                gdsize = edge.dest.parent_graph.size
             else:
                 gdpos = edge.dest.global_pos
+                gdsize = edge.dest.size
 
             nb_next=0
             for j in range(i, len(graph.edges)):
@@ -624,17 +640,28 @@ class QGraphViz_Core(QWidget):
             else:
                 offset[0]=-20*(nb_next/2)
 
-            path = QPainterPath()
-            path.moveTo(gspos[0],gspos[1])
-            path.cubicTo(gspos[0],gspos[1],offset[0]+(gspos[0]+gdpos[0])/2,(gspos[1]+gdpos[1])/2,gdpos[0],gdpos[1])
-            painter.strokePath(path, pen)
-            """
-            painter.drawLine(gspos[0],gspos[1],
-            gdpos[0],
-            gdpos[1])
-            """
+            point_start = QPoint(gspos[0], gspos[1])
+            point_end = QPoint(gdpos[0], gdpos[1])
 
-                   
+            line = QLineF(point_start, point_end)
+            painter.setBrush(Qt.black)
+            if self.is_directed_graph:
+                # Calculate the angle for drawing the arrow depending on the direction of the line
+                angle = math.atan2(-line.dy(), line.dx())
+                arrow_size = self.arrow_size
+                # Prepare calculation for the two lines in order to draw an \"arrow\"
+                line_p1 = QLineF(line.center(), line.center()
+                                 - QPointF(math.sin(angle + math.pi / 3) * arrow_size,
+                                           math.cos(angle + math.pi / 3) * arrow_size))
+                line_p2 = QLineF(line.center(), line.center()
+                                 - QPointF(math.sin(angle + math.pi - math.pi / 3) * arrow_size,
+                                           math.cos(angle + math.pi - math.pi / 3) * arrow_size))
+                painter.drawLine(line_p1)
+                painter.drawLine(line_p2)
+
+            painter.drawLine(line)
+            painter.setBrush(brush)
+
          # TODO : add more painting parameters
         for node in graph.nodes:
             if type(node)!=Graph:
@@ -779,13 +806,13 @@ class QGraphViz_Core(QWidget):
                         width=rect.width() if rect.width()>width else width
                         height+=rect.height()
 
-                    width+=self.engine.margins[0]
-                    height+self.engine.margins[1]
+                    width += self.engine.margins[0]
+                    height += self.engine.margins[1]
                     painter.drawText(
                         int(gpos[0]-width/2),
                         int(gpos[1]-height/2),
                         width, height,
-                        Qt.AlignCenter|Qt.AlignTop,node.kwargs["label"])
+                        Qt.AlignCenter | Qt.AlignTop, node.kwargs["label"])
             else:
                 subgraph = node
                 self.paintSubgraph(subgraph, painter, pen, brush)
@@ -799,20 +826,74 @@ class QGraphViz_Core(QWidget):
                     self.paintGraph(subgraph, painter)     
         """           
 
+    def drawLineWithArrow(self,
+                          painter: QPainter,
+                          point_start_x: int,
+                          point_start_y: int,
+                          point_end_x: int,
+                          point_end_y: int) -> None:
+        """
+        This method draw an Arrow, you have to pass the position of the starting point and the end point (x and y)
+        and also the QPainter in order to draw the arrow
+        (converted from c++ to Python: https://forum.qt.io/topic/109749/how-to-create-an-arrow-in-qt/6)
+        :
+        :param painter: the Painter to use
+        :param point_start_x: the position on x for starting the arrow shape
+        :param point_start_y: the position on y for starting the arrow shape
+        :param point_end_x: the end position on x for the arrow shape
+        :param point_end_y: the end position on y for the arrow shape
+        :type painter: QPainter
+        :type point_start_x: int
+        :type point_start_y: int
+        :type point_end_x: int
+        :type point_end_y: int
+
+        """
+        painter.setPen(Qt.black)
+        painter.setBrush(Qt.black)
+        painter.setRenderHint(QPainter.Antialiasing, True)
+
+        arrow_size = 25
+        point_start = QPoint(point_start_x, point_start_y)
+        point_end = QPoint(point_end_x, point_end_y)
+        line = QLineF(point_end, point_start)
+
+        angle = math.atan2(-line.dy(), line.dx())
+        arrow_p1 = QPointF(line.p1() + QPointF(math.sin(angle + math.pi / 3) * arrow_size,
+                                               math.cos(angle + math.pi / 3) * arrow_size))
+        arrow_p2 = QPointF(line.p1() + QPointF(math.sin(angle + math.pi - math.pi / 3) * arrow_size,
+                                               math.cos(angle + math.pi - math.pi / 3) * arrow_size))
+        arrow_head = QPolygonF()
+        arrow_head.clear()
+        arrow_head.append(line.p1())
+        arrow_head.append(arrow_p1)
+        arrow_head.append(arrow_p2)
+
+        painter.drawLine(line)
+        painter.drawPolygon(arrow_head)
+
     def paintEvent(self, event):
-        painter = QPainter(self) 
+        painter = QPainter(self)
         painter.setFont(self.engine.font)
-        self.paintGraph(self.engine.graph,painter)
+        self.paintGraph(self.engine.graph, painter)
         if( self.manipulation_mode==QGraphVizManipulationMode.Edges_Connect_Mode and 
             self.mouse_down and 
             self.selected_Node is not None):
             bkp = painter.pen()
             pen=QPen(Qt.DashLine)
             painter.setPen(pen)
-            painter.drawLine(self.selected_Node.pos[0], self.selected_Node.pos[1],
-                             self.current_pos[0],self.current_pos[1])
+            if not self.is_directed_graph:
+                painter.drawLine(self.selected_Node.pos[0], self.selected_Node.pos[1],
+                                 self.current_pos[0],self.current_pos[1])
+
+            else:
+                self.drawLineWithArrow(painter=painter,
+                                       point_start_x=self.selected_Node.pos[0],
+                                       point_start_y=self.selected_Node.pos[1],
+                                       point_end_x=self.current_pos[0],
+                                       point_end_y=self.current_pos[1])
             painter.setPen(bkp)
-        painter.end()
+            painter.end()
 
     def updateSize(self):
         x,y,w,h = self.getRect_Size()
@@ -827,52 +908,55 @@ class QGraphViz_Core(QWidget):
                 self.setMinimumHeight(self.parent().height())
 
 class QGraphViz(QScrollArea):
-    def __init__(
-                    self, 
-                    parent=None, 
-                    engine=None, 
-                    auto_freeze=False,
-                    show_subgraphs = True,
-                    manipulation_mode=QGraphVizManipulationMode.Nodes_Move_Mode,
-                    # Callbacks
-                    new_edge_beingAdded_callback=None, # A callback called when a new connection is being added (should return True or False to accept or not the edge, as well as return the edge parameters)
-                    new_edge_created_callback=None, # A callbakc called when a new connection is created between two nodes using the GUI
-                    node_selected_callback=None, # A callback called when a node is clicked
-                    edge_selected_callback=None, # A callback called when an edge is clicked
-                    node_invoked_callback=None, # A callback called when a node is double clicked
-                    edge_invoked_callback=None, # A callback called when an edge is double clicked
-                    node_removed_callback=None, # A callback called when a node is removed
-                    edge_removed_callback=None, # A callback called when an edge is removed
+    def __init__(self,
+                 parent=None,
+                 engine=None,
+                 auto_freeze=False,
+                 show_subgraphs = True,
+                 manipulation_mode=QGraphVizManipulationMode.Nodes_Move_Mode,
+                 # Callbacks
+                 new_edge_beingAdded_callback=None,  # A callback called when a new connection is being added (should return True or False to accept or not the edge, as well as return the edge parameters)
+                 new_edge_created_callback=None,  # A callback called when a new connection is created between two nodes using the GUI
+                 node_selected_callback=None,  # A callback called when a node is clicked
+                 edge_selected_callback=None,  # A callback called when an edge is clicked
+                 node_invoked_callback=None,  # A callback called when a node is double clicked
+                 edge_invoked_callback=None,  # A callback called when an edge is double clicked
+                 node_removed_callback=None,  # A callback called when a node is removed
+                 edge_removed_callback=None,  # A callback called when an edge is removed
 
-                    # Custom options
-                    min_cursor_edge_dist=3,
-                    hilight_Nodes=False,
-                    hilight_Edges=False
-                ):
-            QScrollArea.__init__(self, parent)
-            self.core = QGraphViz_Core(
-                    parent=parent, 
-                    engine=engine, 
-                    auto_freeze=auto_freeze,
-                    show_subgraphs = show_subgraphs,
-                    manipulation_mode=manipulation_mode,
-                    # Callbacks
-                    new_edge_beingAdded_callback=new_edge_beingAdded_callback, # A callback called when a new connection is being added (should return True or False to accept or not the edge, as well as return the edge parameters)
-                    new_edge_created_callback=new_edge_created_callback, # A callbakc called when a new connection is created between two nodes using the GUI
-                    node_selected_callback=node_selected_callback, # A callback called when a node is clicked
-                    edge_selected_callback=edge_selected_callback, # A callback called when an edge is clicked
-                    node_invoked_callback=node_invoked_callback, # A callback called when a node is double clicked
-                    edge_invoked_callback=edge_invoked_callback, # A callback called when an edge is double clicked
-                    node_removed_callback=node_removed_callback, # A callback called when a node is removed
-                    edge_removed_callback=edge_removed_callback, # A callback called when an edge is removed
+                 # Custom options
+                 min_cursor_edge_dist=3,
+                 hilight_Nodes=False,
+                 hilight_Edges=False,
+                 is_directed_graph: bool = False,  # If you want to have a directed graph
+                 arrow_size: int = 25
+                 ):
+        QScrollArea.__init__(self, parent)
+        self.core = QGraphViz_Core(
+                parent=parent,
+                engine=engine,
+                auto_freeze=auto_freeze,
+                show_subgraphs=show_subgraphs,
+                manipulation_mode=manipulation_mode,
+                # Callbacks
+                new_edge_beingAdded_callback=new_edge_beingAdded_callback, # A callback called when a new connection is being added (should return True or False to accept or not the edge, as well as return the edge parameters)
+                new_edge_created_callback=new_edge_created_callback, # A callback called when a new connection is created between two nodes using the GUI
+                node_selected_callback=node_selected_callback, # A callback called when a node is clicked
+                edge_selected_callback=edge_selected_callback, # A callback called when an edge is clicked
+                node_invoked_callback=node_invoked_callback, # A callback called when a node is double clicked
+                edge_invoked_callback=edge_invoked_callback, # A callback called when an edge is double clicked
+                node_removed_callback=node_removed_callback, # A callback called when a node is removed
+                edge_removed_callback=edge_removed_callback, # A callback called when an edge is removed
 
-                    # Custom options
-                    min_cursor_edge_dist=min_cursor_edge_dist,
-                    hilight_Nodes=hilight_Nodes,
-                    hilight_Edges=hilight_Edges
-                )
-            self.setWidgetResizable(True)
-            self.setWidget(self.core)
+                # Custom options
+                min_cursor_edge_dist=min_cursor_edge_dist,
+                hilight_Nodes=hilight_Nodes,
+                hilight_Edges=hilight_Edges,
+                is_directed_graph=is_directed_graph,
+                arrow_size=arrow_size
+            )
+        self.setWidgetResizable(True)
+        self.setWidget(self.core)
     # ======== core forward properties ============ 
     @property
     def engine(self):
@@ -889,6 +973,23 @@ class QGraphViz(QScrollArea):
     @manipulation_mode.setter
     def manipulation_mode(self, manipulation_mode):
         self.core.manipulation_mode = manipulation_mode
+
+    @property
+    def arrow_size(self) -> int:
+        """
+        :return: the arrow_size of the QGraphViz_core
+        """
+        return self.core.arrow_size
+
+    @arrow_size.setter
+    def arrow_size(self, new_arrow_size: int) -> None:
+        """
+        Set the new arrow_size
+        :param new_arrow_size: set the size of the arrow for the directed graph
+        :type new_arrow_size: int
+        """
+        self.core.arrow_size = new_arrow_size
+
 
     # ======== core forward functions ============ 
     # =================== Exposed methods =======================
