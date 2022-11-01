@@ -69,7 +69,7 @@ You can use it safely if you save your graph in our json format.
 Here I'll be citing the contributions of others than myself and show them gratitude for help :
 
 - Many thanks to [Ederrod](https://github.com/Ederrod) for adding icon shaped nodes.
-- Many thanks to [Ederrod](https://github.com/ZeJackOfSpades) for adding directed graphs option.
+- Many thanks to [ZeJackOfSpades](https://github.com/ZeJackOfSpades) for adding directed graphs option.
 
 
 If any one has ideas to enhance this tool, you are welcome to contribute.
