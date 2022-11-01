@@ -58,8 +58,11 @@ if __name__ == "__main__":
         edge_removed_callback=edge_removed,
 
         hilight_Nodes=True,
-        hilight_Edges=True
+        hilight_Edges=True,
+        is_directed_graph=True,
+        arrow_size=22
         )
+    qgv.arrow_size = 25
     qgv.setStyleSheet("background-color:white;")
     # Create A new Graph using Dot layout engine
     qgv.new(Dot(Graph("Main_Graph"), show_subgraphs=show_subgraphs, font = QFont("Arial", 12),margins=[20,20]))
